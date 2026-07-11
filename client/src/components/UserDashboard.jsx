@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { signOut, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import * as txns from '../api/transactions';
 import TransactionForm from './TransactionForm';
@@ -7,6 +6,7 @@ import TransactionList from './TransactionList';
 import ExpenseChart from './ExpenseChart';
 import ExportButton from './ExportButton';
 import Navbar from './Navbar';
+import UserMenu from './UserMenu';
 import Toast, { useToast } from './Toast';
 import useTheme from '../hooks/useTheme';
 
@@ -61,8 +61,6 @@ export default function Dashboard({ user }) {
   const [page, setPage] = useState(1);
   const [catFilter, setCatFilter] = useState('');
   const [dark, setDark] = useTheme();
-  const [editingName, setEditingName] = useState(false);
-  const [newName, setNewName] = useState(user.displayName || '');
   const perPage = 10;
 
   const { toast, show: showToast, setToast } = useToast();
@@ -128,16 +126,6 @@ export default function Dashboard({ user }) {
     }
   };
 
-  const handleSaveName = async () => {
-    try {
-      await updateProfile(auth.currentUser, { displayName: newName });
-      setEditingName(false);
-      showToast('Nama berhasil diubah', 'success');
-    } catch {
-      showToast('Gagal mengubah nama', 'error');
-    }
-  };
-
   const filtered = catFilter ? data.filter((t) => t.category === catFilter) : data;
   const totalPages = Math.ceil(filtered.length / perPage);
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
@@ -173,29 +161,7 @@ export default function Dashboard({ user }) {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700" />
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
         <Navbar dark={dark} onToggleTheme={() => setDark(!dark)}>
-          {editingName ? (
-            <form onSubmit={(e) => { e.preventDefault(); handleSaveName(); }} className="flex gap-1">
-              <input
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                className="text-xs p-1 border rounded w-20 sm:w-32 dark:bg-gray-700 dark:text-white"
-                required
-              />
-              <button type="submit" className="text-xs text-blue-600 hover:underline">Simpan</button>
-              <button type="button" onClick={() => setEditingName(false)} className="text-xs text-gray-500 hover:underline">Batal</button>
-            </form>
-          ) : (
-            <button
-              onClick={() => setEditingName(true)}
-              className="text-xs sm:text-sm text-white/80 hover:text-white truncate max-w-[120px] sm:max-w-none"
-            >
-              {user.displayName || user.email}
-            </button>
-          )}
-          <button onClick={() => signOut(auth)} className="text-xs sm:text-sm bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg shrink-0 transition">
-            Keluar
-          </button>
+          <UserMenu user={user} onProfileSaved={() => {}} />
         </Navbar>
       </div>
 

@@ -41,7 +41,8 @@ export default function Login({ onSwitch }) {
 
   useEffect(() => {
     if (showForgot) {
-      setTimeout(() => forgotEmailRef.current?.focus(), 100);
+      const t = setTimeout(() => forgotEmailRef.current?.focus(), 300);
+      return () => clearTimeout(t);
     }
   }, [showForgot]);
 
@@ -143,8 +144,8 @@ export default function Login({ onSwitch }) {
   };
 
   const ForgotModal = () => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onPointerDown={(e) => { if (e.target === e.currentTarget) return; }}>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-sm" onPointerDown={(e) => e.preventDefault()}>
         <h3 className="text-lg font-semibold mb-1 dark:text-white">Lupa Password</h3>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Masukkan email untuk menerima link reset password.</p>
         {forgotError && (

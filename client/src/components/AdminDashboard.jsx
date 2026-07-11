@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { getAllUsersWithTransactions } from '../api/admin';
 import { setUserRole } from '../api/users';
 import Navbar from './Navbar';
+import UserMenu from './UserMenu';
 import Toast, { useToast } from './Toast';
 import useTheme from '../hooks/useTheme';
 
@@ -64,12 +64,7 @@ export default function AdminDashboard({ user, userData }) {
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500 via-purple-600 to-pink-700" />
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
         <Navbar dark={dark} onToggleTheme={() => setDark(!dark)}>
-          <span className="text-xs sm:text-sm text-white/80 truncate max-w-[120px] sm:max-w-none">
-            {user.displayName || user.email}
-          </span>
-          <button onClick={() => signOut(auth)} className="text-xs sm:text-sm bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg transition">
-            Keluar
-          </button>
+          <UserMenu user={user} onProfileSaved={() => {}} />
         </Navbar>
       </div>
 
