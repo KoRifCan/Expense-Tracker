@@ -7,17 +7,14 @@ import Login from './components/Login';
 import Register from './components/Register';
 import UserDashboard from './components/UserDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import useTheme from './hooks/useTheme';
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState('login');
-  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark);
-  }, [dark]);
+  const [dark, setDark] = useTheme();
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -55,7 +52,7 @@ export default function App() {
         <div className="flex justify-end mb-4">
           <div className="flex items-center gap-3">
             <span className="text-xs text-white/70">{dark ? 'Gelap' : 'Terang'}</span>
-            <ThemeToggle dark={dark} onToggle={() => { setDark(!dark); localStorage.setItem('theme', dark ? 'light' : 'dark'); }} />
+            <ThemeToggle dark={dark} onToggle={() => setDark(!dark)} />
           </div>
         </div>
         <div className="text-center mb-8">

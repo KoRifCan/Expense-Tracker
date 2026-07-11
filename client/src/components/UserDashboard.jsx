@@ -8,6 +8,7 @@ import ExpenseChart from './ExpenseChart';
 import ExportButton from './ExportButton';
 import ThemeToggle from './ThemeToggle';
 import Toast, { useToast } from './Toast';
+import useTheme from '../hooks/useTheme';
 
 const CATEGORIES = ['Makanan', 'Transportasi', 'Belanja', 'Hiburan', 'Tagihan', 'Kesehatan', 'Pendidikan', 'Gaji', 'Freelance', 'Lainnya'];
 
@@ -19,7 +20,7 @@ export default function Dashboard({ user }) {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [catFilter, setCatFilter] = useState('');
-  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
+  const [dark, setDark] = useTheme();
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState(user.displayName || '');
   const perPage = 10;
@@ -33,7 +34,6 @@ export default function Dashboard({ user }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
-    localStorage.setItem('theme', dark ? 'dark' : 'light');
   }, [dark]);
 
   const loadData = useCallback(async () => {

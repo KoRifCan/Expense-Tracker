@@ -5,17 +5,17 @@ import { getAllUsersWithTransactions } from '../api/admin';
 import { setUserRole } from '../api/users';
 import ThemeToggle from './ThemeToggle';
 import Toast, { useToast } from './Toast';
+import useTheme from '../hooks/useTheme';
 
 export default function AdminDashboard({ user, userData }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
+  const [dark, setDark] = useTheme();
   const { toast, show: showToast, setToast } = useToast();
   const [expandedUser, setExpandedUser] = useState(null);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark);
-    localStorage.setItem('theme', dark ? 'dark' : 'light');
   }, [dark]);
 
   const loadUsers = async () => {
