@@ -204,3 +204,4 @@ Proyek ini bersifat **open source**. Silakan gunakan, modifikasi, dan sebarkan.
 ---
 
 Dibuat dengan ❤️ oleh [KoRifCan](https://github.com/KoRifCan)
+
