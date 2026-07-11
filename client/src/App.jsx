@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase/config';
 import { getUser } from './api/users';
@@ -16,6 +16,13 @@ export default function App() {
   const [page, setPage] = useState('login');
   const [dark, setDark] = useTheme();
   const [awaitingVerification, setAwaitingVerification] = useState(false);
+  const timerRef = useRef(null);
+
+  const verifyRole = async (u) => {
+    if (!u) return;
+    const data = await getUser(u.uid);
+    setUserData(data);
+  };
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -30,6 +37,12 @@ export default function App() {
     });
     return unsub;
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    timerRef.current = setInterval(() => verifyRole(user), 30000);
+    return () => clearInterval(timerRef.current);
+  }, [user]);
 
   if (loading) {
     return (

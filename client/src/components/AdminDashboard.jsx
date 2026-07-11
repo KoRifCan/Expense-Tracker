@@ -65,7 +65,7 @@ function TrendChart({ transactions, dark }) {
   );
 }
 
-export default function AdminDashboard({ user }) {
+export default function AdminDashboard({ user, userData }) {
   const [data, setData] = useState([]);
   const [summary, setSummary] = useState(null);
   const [editing, setEditing] = useState(null);
