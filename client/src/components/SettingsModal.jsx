@@ -181,7 +181,7 @@ export default function SettingsModal({ onClose }) {
                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Foto Profil</p>
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden">
-                    {auth.currentUser?.photoURL ? (
+                    {photoURL ? (
                       <img src={photoURL} alt="" className="w-full h-full object-cover" />
                     ) : (
                       (auth.currentUser?.displayName || auth.currentUser?.email || '?')[0].toUpperCase()
