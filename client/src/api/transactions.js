@@ -7,23 +7,28 @@ import {
 const col = (uid) => collection(db, 'users', uid, 'transactions');
 
 export const getAll = async (uid, { month, year } = {}) => {
-  let q = query(col(uid), orderBy('date', 'desc'), orderBy('createdAt', 'desc'));
+  let constraints = [orderBy('date', 'desc')];
 
   if (month && year) {
     const start = `${year}-${month.padStart(2, '0')}-01`;
     const endDate = new Date(Number(year), Number(month), 0);
     const end = `${year}-${String(month).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
-    q = query(
-      col(uid),
+    constraints = [
       where('date', '>=', start),
       where('date', '<=', end),
       orderBy('date', 'desc'),
-      orderBy('createdAt', 'desc')
-    );
+    ];
   }
 
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  try {
+    const snap = await getDocs(query(col(uid), ...constraints));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    if (err.code === 'failed-precondition') {
+      return [];
+    }
+    throw err;
+  }
 };
 
 export const getSummary = async (uid, { month, year } = {}) => {
