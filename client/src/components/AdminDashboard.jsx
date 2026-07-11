@@ -577,8 +577,12 @@ export default function AdminDashboard({ user }) {
                             className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-0 px-3 sm:px-4 py-2.5 sm:py-3 cursor-pointer"
                           >
                             <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                                {(u.name || u.email || '?')[0].toUpperCase()}
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden">
+                                {u.photoURL ? (
+                                  <img src={u.photoURL} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                  (u.name || u.email || '?')[0].toUpperCase()
+                                )}
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-1.5">
