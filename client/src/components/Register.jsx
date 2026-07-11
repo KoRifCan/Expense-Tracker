@@ -10,8 +10,9 @@ import {
 import { auth, googleProvider } from '../firebase/config';
 import { createUser } from '../api/users';
 import ErrorMessage from './ErrorMessage';
+import { isDisposableEmail } from '../utils/disposableEmails';
 
-export default function Register({ onSwitch }) {
+export default function Register({ onSwitch, setAwaitingVerification }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,15 +26,22 @@ export default function Register({ onSwitch }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    if (isDisposableEmail(email)) {
+      setError('Email sementara/tidak valid tidak diizinkan. Gunakan email asli.');
+      return;
+    }
     setLoading(true);
+    setAwaitingVerification(true);
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName: name });
       await createUser(cred.user.uid, { name, email, emailVerified: false });
       await sendEmailVerification(cred.user);
       await signOut(auth);
+      setAwaitingVerification(false);
       setVerificationSent(true);
     } catch (err) {
+      setAwaitingVerification(false);
       if (err.code === 'auth/email-already-in-use') {
         setError('Email sudah terdaftar');
       } else if (err.code === 'auth/weak-password') {
@@ -85,9 +93,11 @@ export default function Register({ onSwitch }) {
           </svg>
         </div>
         <h2 className="text-xl font-semibold mb-2 dark:text-white">Cek Email Kamu</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
           Email verifikasi sudah dikirim ke <strong className="text-gray-700 dark:text-gray-200">{email}</strong>.
-          Klik link di email untuk verifikasi, lalu login.
+        </p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">
+          Klik link di email untuk verifikasi, lalu login. Jangan lupa cek folder spam ya!
         </p>
         <button
           onClick={onSwitch}

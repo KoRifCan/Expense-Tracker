@@ -15,6 +15,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState('login');
   const [dark, setDark] = useTheme();
+  const [awaitingVerification, setAwaitingVerification] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -38,7 +39,7 @@ export default function App() {
     );
   }
 
-  if (user) {
+  if (user && !awaitingVerification) {
     if (userData?.role === 'admin') {
       return <AdminDashboard user={user} userData={userData} />;
     }
@@ -63,7 +64,7 @@ export default function App() {
           {page === 'login' ? (
             <Login onSwitch={() => setPage('register')} />
           ) : (
-            <Register onSwitch={() => setPage('login')} />
+            <Register onSwitch={() => setPage('login')} setAwaitingVerification={setAwaitingVerification} />
           )}
           <p className="text-center text-xs text-white/50 mt-6">
             &copy; {new Date().getFullYear()} Rifan Eko Candra Maulana

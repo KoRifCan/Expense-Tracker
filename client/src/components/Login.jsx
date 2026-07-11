@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -37,6 +37,13 @@ export default function Login({ onSwitch }) {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotError, setForgotError] = useState('');
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const forgotEmailRef = useRef(null);
+
+  useEffect(() => {
+    if (showForgot) {
+      setTimeout(() => forgotEmailRef.current?.focus(), 100);
+    }
+  }, [showForgot]);
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
@@ -166,6 +173,7 @@ export default function Login({ onSwitch }) {
         ) : (
           <form onSubmit={handleForgotSubmit}>
             <input
+              ref={forgotEmailRef}
               type="email"
               placeholder="Email"
               className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white transition mb-4"
