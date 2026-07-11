@@ -1,7 +1,7 @@
 import { db } from '../firebase/config';
 import {
   collection, query, where, orderBy, getDocs,
-  addDoc, updateDoc, deleteDoc, doc,
+  addDoc, updateDoc, deleteDoc, doc, writeBatch,
 } from 'firebase/firestore';
 
 const col = (uid) => collection(db, 'users', uid, 'transactions');
@@ -64,4 +64,11 @@ export const update = async (uid, id, data) => {
 
 export const del = async (uid, id) => {
   await deleteDoc(doc(db, 'users', uid, 'transactions', id));
+};
+
+export const deleteAll = async (uid) => {
+  const snap = await getDocs(col(uid));
+  const batch = writeBatch(db);
+  snap.docs.forEach((d) => batch.delete(d.ref));
+  await batch.commit();
 };
