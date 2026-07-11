@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  linkWithCredential,
+  EmailAuthProvider,
+} from 'firebase/auth';
 import { auth, googleProvider } from '../firebase/config';
 
 export default function Login({ onSwitch }) {
@@ -7,6 +12,8 @@ export default function Login({ onSwitch }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pendingCred, setPendingCred] = useState(null);
+  const [pendingEmail, setPendingEmail] = useState('');
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
@@ -15,9 +22,27 @@ export default function Login({ onSwitch }) {
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      setError(err.message === 'Firebase: Error (auth/invalid-credential).'
-        ? 'Email atau password salah'
-        : err.message);
+      if (err.code === 'auth/invalid-credential') {
+        setError('Email atau password salah');
+      } else {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLinkAccount = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const result = await signInWithEmailAndPassword(auth, pendingEmail, password);
+      await linkWithCredential(result.user, pendingCred);
+      setPendingCred(null);
+      setPendingEmail('');
+    } catch (err) {
+      setError(err.code === 'auth/invalid-credential' ? 'Password salah' : err.message);
     } finally {
       setLoading(false);
     }
@@ -28,11 +53,52 @@ export default function Login({ onSwitch }) {
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
+      if (err.code === 'auth/account-exists-with-different-credential') {
+        setPendingCred(err.credential);
+        setPendingEmail(err.email);
+        setError('');
+      } else if (err.code !== 'auth/popup-closed-by-user') {
         setError(err.message);
       }
     }
   };
+
+  if (pendingCred) {
+    return (
+      <div className="bg-white p-8 rounded-xl shadow-md">
+        <h2 className="text-xl font-semibold mb-4">Hubungkan Akun</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Email <strong>{pendingEmail}</strong> sudah terdaftar dengan password.
+          Masukkan password untuk menghubungkan akun Google.
+        </p>
+        {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+        <form onSubmit={handleLinkAccount}>
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 mb-2"
+          >
+            {loading ? 'Memproses...' : 'Hubungkan'}
+          </button>
+          <button
+            type="button"
+            onClick={() => { setPendingCred(null); setPendingEmail(''); setPassword(''); }}
+            className="w-full text-sm text-gray-500 hover:underline"
+          >
+            Batal
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
