@@ -2,7 +2,11 @@
 
 Aplikasi pencatat pemasukan & pengeluaran pribadi dengan panel admin, multi-user, dark mode, dan grafik interaktif.
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-https://korifcan.github.io/Expense--Tracker/-blue?style=for-the-badge&logo=github)](https://korifcan.github.io/Expense-Tracker/)
+<p align="center">
+  <a href="https://korifcan.github.io/Expense-Tracker/">
+    <img src="https://img.shields.io/badge/%F0%9F%9A%80%20Live%20Demo-Klik%20Disini-2563eb?style=flat-square&labelColor=1e40af" alt="Live Demo">
+  </a>
+</p>
 
 ---
 
