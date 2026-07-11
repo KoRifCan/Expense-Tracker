@@ -6,7 +6,7 @@ import TransactionForm from './TransactionForm';
 import TransactionList from './TransactionList';
 import ExpenseChart from './ExpenseChart';
 import ExportButton from './ExportButton';
-import ThemeToggle from './ThemeToggle';
+import Navbar from './Navbar';
 import Toast, { useToast } from './Toast';
 import useTheme from '../hooks/useTheme';
 
@@ -116,17 +116,7 @@ export default function Dashboard({ user }) {
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700" />
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
-        <nav className="relative px-4 py-3 flex justify-between items-center gap-2">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h1 className="text-lg sm:text-xl font-bold text-white shrink-0">Catatan Keuangan</h1>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-            <ThemeToggle dark={dark} onToggle={() => setDark(!dark)} />
+        <Navbar dark={dark} onToggleTheme={() => setDark(!dark)}>
           {editingName ? (
             <form onSubmit={(e) => { e.preventDefault(); handleSaveName(); }} className="flex gap-1">
               <input
@@ -150,8 +140,7 @@ export default function Dashboard({ user }) {
           <button onClick={() => signOut(auth)} className="text-xs sm:text-sm bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg shrink-0 transition">
             Keluar
           </button>
-        </div>
-        </nav>
+        </Navbar>
       </div>
 
       <div className="max-w-4xl mx-auto p-3 sm:p-4">

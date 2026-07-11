@@ -3,7 +3,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { getAllUsersWithTransactions } from '../api/admin';
 import { setUserRole } from '../api/users';
-import ThemeToggle from './ThemeToggle';
+import Navbar from './Navbar';
 import Toast, { useToast } from './Toast';
 import useTheme from '../hooks/useTheme';
 
@@ -63,25 +63,14 @@ export default function AdminDashboard({ user, userData }) {
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500 via-purple-600 to-pink-700" />
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
-        <nav className="relative px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-              </svg>
-            </div>
-            <h1 className="text-lg sm:text-xl font-bold text-white shrink-0">Admin Panel</h1>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <ThemeToggle dark={dark} onToggle={() => setDark(!dark)} />
-            <span className="text-xs sm:text-sm text-white/80 truncate max-w-[120px] sm:max-w-none">
-              {user.displayName || user.email}
-            </span>
-            <button onClick={() => signOut(auth)} className="text-xs sm:text-sm bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg transition">
-              Keluar
-            </button>
-          </div>
-        </nav>
+        <Navbar dark={dark} onToggleTheme={() => setDark(!dark)}>
+          <span className="text-xs sm:text-sm text-white/80 truncate max-w-[120px] sm:max-w-none">
+            {user.displayName || user.email}
+          </span>
+          <button onClick={() => signOut(auth)} className="text-xs sm:text-sm bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg transition">
+            Keluar
+          </button>
+        </Navbar>
       </div>
 
       <div className="max-w-6xl mx-auto p-3 sm:p-4">
