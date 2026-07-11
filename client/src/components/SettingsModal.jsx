@@ -1,14 +1,21 @@
-import { useState, useRef } from 'react';
-import { updateProfile, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, sendEmailVerification } from 'firebase/auth';
+import { useState, useRef, useEffect } from 'react';
+import { updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, sendEmailVerification } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { deleteOwnAccount } from '../api/users';
+import { deleteOwnAccount, updatePhotoURL, getUser } from '../api/users';
 
 export default function SettingsModal({ onClose }) {
   const [tab, setTab] = useState('akun');
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
   const [msgType, setMsgType] = useState('success');
+  const [photoURL, setPhotoURL] = useState(auth.currentUser?.photoURL || '');
   const fileRef = useRef(null);
+
+  useEffect(() => {
+    getUser(auth.currentUser.uid).then((u) => {
+      if (u?.photoURL) setPhotoURL(u.photoURL);
+    }).catch(() => {});
+  }, []);
 
   const [name, setName] = useState(auth.currentUser?.displayName || '');
   const [newEmail, setNewEmail] = useState('');
@@ -36,7 +43,7 @@ export default function SettingsModal({ onClose }) {
         const url = URL.createObjectURL(file);
         img.onload = () => {
           URL.revokeObjectURL(url);
-          const max = 150;
+          const max = 80;
           const canvas = document.createElement('canvas');
           const ratio = Math.min(max / img.width, max / img.height, 1);
           canvas.width = Math.round(img.width * ratio);
@@ -49,12 +56,13 @@ export default function SettingsModal({ onClose }) {
             r.onload = () => resolve(r.result);
             r.onerror = reject;
             r.readAsDataURL(blob);
-          }, 'image/jpeg', 0.6);
+          }, 'image/jpeg', 0.5);
         };
         img.onerror = reject;
         img.src = url;
       });
-      await updateProfile(auth.currentUser, { photoURL: dataUrl });
+      await updatePhotoURL(auth.currentUser.uid, dataUrl);
+      setPhotoURL(dataUrl);
       showMsg('Foto profil berhasil diubah');
     } catch (err) {
       console.error('Upload error:', err);
@@ -174,7 +182,7 @@ export default function SettingsModal({ onClose }) {
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden">
                     {auth.currentUser?.photoURL ? (
-                      <img src={auth.currentUser.photoURL} alt="" className="w-full h-full object-cover" />
+                      <img src={photoURL} alt="" className="w-full h-full object-cover" />
                     ) : (
                       (auth.currentUser?.displayName || auth.currentUser?.email || '?')[0].toUpperCase()
                     )}
