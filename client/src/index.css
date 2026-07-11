@@ -13,3 +13,10 @@
 *, *::before, *::after {
   transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
+
+.chart-no-focus *:focus {
+  outline: none !important;
+}
+.chart-no-focus * {
+  -webkit-tap-highlight-color: transparent;
+}

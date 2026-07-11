@@ -8,6 +8,7 @@ import TransactionList from './TransactionList';
 import ExpenseChart from './ExpenseChart';
 import IncomeChart from './IncomeChart';
 import CombinedChart from './CombinedChart';
+import ChartTooltip from './ChartTooltip';
 import ExportButton from './ExportButton';
 import Navbar from './Navbar';
 import UserMenu from './UserMenu';
@@ -35,7 +36,7 @@ function TrendChart({ transactions, dark }) {
   if (data.every((d) => d.Pemasukan === 0 && d.Pengeluaran === 0)) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md chart-no-focus">
       <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Tren Harian (Bulan Ini)</h3>
       <ResponsiveContainer width="100%" height={200}>
         <AreaChart data={data}>
@@ -52,7 +53,7 @@ function TrendChart({ transactions, dark }) {
           <CartesianGrid strokeDasharray="3 3" stroke={dark ? '#374151' : '#e5e7eb'} />
           <XAxis dataKey="day" tick={{ fontSize: 10, fill: dark ? '#9ca3af' : '#6b7280' }} interval={2} />
           <YAxis tick={{ fontSize: 10, fill: dark ? '#9ca3af' : '#6b7280' }} />
-          <Tooltip contentStyle={{ backgroundColor: dark ? '#1f2937' : '#fff', border: 'none', borderRadius: 8, color: dark ? '#f3f4f6' : '#111827' }} formatter={(v) => `Rp${v.toLocaleString('id-ID')}`} />
+          <Tooltip content={<ChartTooltip />} />
           <Legend wrapperStyle={{ fontSize: 11, color: dark ? '#d1d5db' : '#6b7280' }} />
           <Area type="monotone" dataKey="Pemasukan" stroke="#22c55e" fill="url(#incomeGrad)" strokeWidth={2} />
           <Area type="monotone" dataKey="Pengeluaran" stroke="#ef4444" fill="url(#expenseGrad)" strokeWidth={2} />

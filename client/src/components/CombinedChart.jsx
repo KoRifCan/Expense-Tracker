@@ -1,4 +1,5 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import ChartTooltip from './ChartTooltip';
 
 const COLORS = ['#22c55e', '#ef4444'];
 
@@ -20,7 +21,7 @@ export default function CombinedChart({ incomeCategories, expenseCategories }) {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md chart-no-focus">
       <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Perbandingan Pemasukan & Pengeluaran</h3>
       <ResponsiveContainer width="100%" height={280}>
         <PieChart>
@@ -39,10 +40,7 @@ export default function CombinedChart({ incomeCategories, expenseCategories }) {
               <Cell key={i} fill={COLORS[i % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip
-            contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
-            formatter={(v) => `Rp${v.toLocaleString('id-ID')}`}
-          />
+          <Tooltip content={<ChartTooltip />} />
           <Legend wrapperStyle={{ fontSize: 11 }} />
         </PieChart>
       </ResponsiveContainer>
