@@ -31,7 +31,7 @@ export default function ExpenseChart({ categories }) {
               <Cell key={i} fill={COLORS[i % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip content={<ChartTooltip />} />
+          <Tooltip content={<ChartTooltip />} offset={8} />
           <Legend wrapperStyle={{ fontSize: 11 }} />
         </PieChart>
       </ResponsiveContainer>

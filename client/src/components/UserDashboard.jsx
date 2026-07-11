@@ -51,7 +51,7 @@ const TrendChart = ({ transactions, dark }) => {
           <CartesianGrid strokeDasharray="3 3" stroke={dark ? '#374151' : '#e5e7eb'} />
           <XAxis dataKey="day" tick={{ fontSize: 10, fill: dark ? '#9ca3af' : '#6b7280' }} interval={2} />
           <YAxis tick={{ fontSize: 10, fill: dark ? '#9ca3af' : '#6b7280' }} />
-          <Tooltip content={<ChartTooltip />} />
+          <Tooltip content={<ChartTooltip />} offset={8} />
           <Legend wrapperStyle={{ fontSize: 11, color: dark ? '#d1d5db' : '#6b7280' }} />
           <Area type="monotone" dataKey="Pemasukan" stroke="#22c55e" fill="url(#incomeGrad)" strokeWidth={2} />
           <Area type="monotone" dataKey="Pengeluaran" stroke="#ef4444" fill="url(#expenseGrad)" strokeWidth={2} />
