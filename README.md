@@ -24,11 +24,12 @@ Aplikasi pencatat pemasukan & pengeluaran pribadi dengan panel admin, multi-user
 
 ### 💳 Transaksi
 - Tambah, edit, hapus transaksi
+- Format rupiah otomatis (1.000) saat mengetik nominal
 - 10 kategori (Makanan, Transportasi, Belanja, dll)
 - Hapus semua riwayat dengan konfirmasi
 
 ### ⚙️ Pengaturan Akun
-- Foto profil (upload via base64, kompres otomatis, simpan di Firestore)
+- Foto profil (upload, hapus, kompres otomatis, simpan di Firestore)
 - Ubah nama tampilan
 - Ubah email (dengan verifikasi ulang password + kirim verifikasi)
 - Ubah password (min 6 karakter, dengan verifikasi ulang)
