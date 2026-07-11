@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { createUser } from '../api/users';
+import ErrorMessage from './ErrorMessage';
 
 export default function Register({ onSwitch }) {
   const [name, setName] = useState('');
@@ -34,7 +35,7 @@ export default function Register({ onSwitch }) {
   return (
     <form onSubmit={handleSubmit} className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm p-8 rounded-2xl shadow-xl">
       <h2 className="text-2xl font-semibold mb-6 text-center dark:text-white">Daftar</h2>
-      {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+      <ErrorMessage message={error} onClose={() => setError('')} />
       <div className="space-y-4 mb-6">
         <div className="relative">
           <svg className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

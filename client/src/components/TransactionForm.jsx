@@ -5,6 +5,8 @@ const categories = [
   'Kesehatan', 'Pendidikan', 'Gaji', 'Freelance', 'Lainnya',
 ];
 
+import ErrorMessage from './ErrorMessage';
+
 export default function TransactionForm({ onSubmit, initialData, onCancel }) {
   const [type, setType] = useState(initialData?.type || 'expense');
   const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
@@ -35,7 +37,7 @@ export default function TransactionForm({ onSubmit, initialData, onCancel }) {
         <span className="w-1.5 h-5 bg-blue-500 rounded-full inline-block" />
         {initialData ? 'Edit Transaksi' : 'Tambah Transaksi'}
       </h3>
-      {error && <p className="text-red-500 text-sm mb-4 text-center bg-red-50 dark:bg-red-900/30 p-2 rounded-lg">{error}</p>}
+      <ErrorMessage message={error} onClose={() => setError('')} />
       <div className="flex gap-3 mb-5">
         <button type="button" onClick={() => setType('expense')}
           className={`flex-1 p-2.5 rounded-xl font-medium text-sm transition ${
