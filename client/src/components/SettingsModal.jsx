@@ -77,6 +77,20 @@ export default function SettingsModal({ onClose }) {
     }
   };
 
+  const handleRemovePhoto = async () => {
+    setSaving(true);
+    try {
+      await updatePhotoURL(auth.currentUser.uid, '');
+      localStorage.removeItem('photoURL');
+      setPhotoURL('');
+      showMsg('Foto profil berhasil dihapus');
+    } catch {
+      showMsg('Gagal menghapus foto', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleName = async () => {
     if (!name.trim()) return;
     setSaving(true);
@@ -195,6 +209,11 @@ export default function SettingsModal({ onClose }) {
                     <button onClick={() => fileRef.current?.click()} disabled={saving} className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium transition">
                       {saving ? 'Mengupload...' : 'Ganti Foto'}
                     </button>
+                    {photoURL && (
+                      <button onClick={handleRemovePhoto} disabled={saving} className="text-xs px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 font-medium transition ml-1">
+                        Hapus
+                      </button>
+                    )}
                     <p className="text-[10px] text-gray-400 mt-1">Maks 5MB, format JPG/PNG</p>
                   </div>
                   <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
