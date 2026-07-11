@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
 export default function Register({ onSwitch }) {
@@ -14,7 +14,8 @@ export default function Register({ onSwitch }) {
     setError('');
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: name });
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') {
         setError('Email sudah terdaftar');
