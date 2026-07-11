@@ -71,6 +71,7 @@ export default function Dashboard({ user }) {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [catFilter, setCatFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [dark, setDark] = useTheme();
   const perPage = 10;
 
@@ -137,7 +138,11 @@ export default function Dashboard({ user }) {
     }
   };
 
-  const filtered = catFilter ? data.filter((t) => t.category === catFilter) : data;
+  const filtered = data.filter((t) => {
+    if (catFilter && t.category !== catFilter) return false;
+    if (typeFilter && t.type !== typeFilter) return false;
+    return true;
+  });
   const totalPages = Math.ceil(filtered.length / perPage);
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
 
@@ -168,7 +173,7 @@ export default function Dashboard({ user }) {
 
   return (
     <div className={`min-h-screen ${dark ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-      <div className="relative overflow-hidden">
+      <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700" />
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
         <Navbar dark={dark} onToggleTheme={() => setDark(!dark)}>
@@ -324,6 +329,33 @@ export default function Dashboard({ user }) {
                   );
                 })}
               </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <button
+                onClick={() => setTypeFilter('')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                  !typeFilter ? 'bg-blue-500 text-white shadow' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                Semua
+              </button>
+              <button
+                onClick={() => setTypeFilter('income')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                  typeFilter === 'income' ? 'bg-green-500 text-white shadow' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                Pemasukan
+              </button>
+              <button
+                onClick={() => setTypeFilter('expense')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                  typeFilter === 'expense' ? 'bg-red-500 text-white shadow' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                Pengeluaran
+              </button>
             </div>
 
             <button
