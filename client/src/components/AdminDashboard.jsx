@@ -233,11 +233,11 @@ export default function AdminDashboard({ user }) {
       </div>
 
       <div className="max-w-6xl mx-auto p-3 sm:p-4">
-        <div className="flex gap-1 bg-white/25 backdrop-blur-sm rounded-2xl p-1 mb-4 w-fit shadow-sm">
+        <div className="flex gap-1 bg-gray-200 dark:bg-white/20 rounded-2xl p-1 mb-4 w-fit">
           <button
             onClick={() => setTab('dashboard')}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition ${
-              tab === 'dashboard' ? 'bg-white text-blue-600 shadow-sm' : 'text-white hover:bg-white/20'
+              tab === 'dashboard' ? 'bg-white text-blue-600 shadow-sm dark:bg-white dark:text-blue-600' : 'text-gray-600 dark:text-white hover:bg-gray-300/50 dark:hover:bg-white/20'
             }`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,7 +248,7 @@ export default function AdminDashboard({ user }) {
           <button
             onClick={() => setTab('admin')}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition ${
-              tab === 'admin' ? 'bg-white text-blue-600 shadow-sm' : 'text-white hover:bg-white/20'
+              tab === 'admin' ? 'bg-white text-blue-600 shadow-sm dark:bg-white dark:text-blue-600' : 'text-gray-600 dark:text-white hover:bg-gray-300/50 dark:hover:bg-white/20'
             }`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
