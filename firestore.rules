@@ -18,8 +18,8 @@ service cloud.firestore {
       // Create: only during registration (must be self)
       allow create: if isOwner(uid);
 
-      // Update: self can update name/email/photoURL but NOT role; admin can update anything
-      allow update: if (isOwner(uid) && request.resource.data.role == resource.data.role) || isAdmin();
+      // Update: self can update profile but NOT role/disabled; admin can update anything
+      allow update: if (isOwner(uid) && request.resource.data.role == resource.data.role && request.resource.data.disabled == resource.data.disabled) || isAdmin();
 
       // Delete: admin only, or self (user deleting own account)
       allow delete: if isAdmin() || isOwner(uid);

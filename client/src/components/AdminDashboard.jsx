@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { auth } from '../firebase/config';
 import * as txns from '../api/transactions';
 import { getAllUsersWithTransactions, deleteUserAccount, deleteUserTransactions, deleteAllUsersTransactions } from '../api/admin';
-import { setUserRole, getUser } from '../api/users';
+import { setUserRole, setUserDisabled, getUser } from '../api/users';
 import TransactionForm from './TransactionForm';
 import TransactionList from './TransactionList';
 import ExpenseChart from './ExpenseChart';
@@ -189,6 +189,16 @@ export default function AdminDashboard({ user, userData }) {
       loadUsers();
     } catch {
       showToast('Gagal mengubah role', 'error');
+    }
+  };
+
+  const handleToggleDisable = async (uid, currentDisabled) => {
+    try {
+      await setUserDisabled(uid, !currentDisabled);
+      showToast(currentDisabled ? 'Akun diaktifkan' : 'Akun dinonaktifkan', 'success');
+      loadUsers();
+    } catch {
+      showToast('Gagal mengubah status akun', 'error');
     }
   };
 
@@ -576,21 +586,26 @@ export default function AdminDashboard({ user, userData }) {
                             onClick={() => setExpandedUser(isExpanded ? null : u.uid)}
                             className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-0 px-3 sm:px-4 py-2.5 sm:py-3 cursor-pointer"
                           >
-                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden">
-                                {u.photoURL ? (
-                                  <img src={u.photoURL} alt="" className="w-full h-full object-cover" />
-                                ) : (
-                                  (u.name || u.email || '?')[0].toUpperCase()
-                                )}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-sm font-medium dark:text-white truncate">{u.name || 'Tanpa Nama'}</span>
-                                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${u.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'}`}>
-                                    {u.role || 'user'}
-                                  </span>
+                              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden">
+                                  {u.photoURL ? (
+                                    <img src={u.photoURL} alt="" className="w-full h-full object-cover" />
+                                  ) : (
+                                    (u.name || u.email || '?')[0].toUpperCase()
+                                  )}
                                 </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="text-sm font-medium dark:text-white truncate">{u.name || 'Tanpa Nama'}</span>
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${u.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'}`}>
+                                      {u.role || 'user'}
+                                    </span>
+                                    {u.disabled && (
+                                      <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 shrink-0">
+                                        Dinonaktifkan
+                                      </span>
+                                    )}
+                                  </div>
                                 <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate">{u.email}</p>
                               </div>
                             </div>
@@ -607,6 +622,16 @@ export default function AdminDashboard({ user, userData }) {
                                   }`}
                                 >
                                   {u.role === 'admin' ? 'Turunkan' : 'Promosi'}
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleToggleDisable(u.uid, u.disabled); }}
+                                  className={`text-[11px] px-2 py-1 rounded-lg font-medium transition ${
+                                    u.disabled
+                                      ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400'
+                                      : 'bg-orange-100 text-orange-600 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400'
+                                  }`}
+                                >
+                                  {u.disabled ? 'Aktifkan' : 'Nonaktifkan'}
                                 </button>
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setConfirmDelete(u.uid); }}

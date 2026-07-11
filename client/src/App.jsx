@@ -21,7 +21,7 @@ export default function App() {
   const verifyRole = async (u) => {
     if (!u) return;
     const data = await getUser(u.uid);
-    if (!data) {
+    if (!data || data.disabled) {
       await auth.signOut();
       return;
     }
@@ -32,7 +32,7 @@ export default function App() {
     const unsub = onAuthStateChanged(auth, async (u) => {
       if (u) {
         const data = await getUser(u.uid);
-        if (!data) {
+        if (!data || data.disabled) {
           await auth.signOut();
           return;
         }

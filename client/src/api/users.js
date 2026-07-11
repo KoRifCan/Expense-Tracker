@@ -29,6 +29,10 @@ export async function updatePhotoURL(uid, dataUrl) {
   await setDoc(doc(db, 'users', uid), { photoURL: dataUrl }, { merge: true });
 }
 
+export async function setUserDisabled(uid, disabled) {
+  await setDoc(doc(db, 'users', uid), { disabled }, { merge: true });
+}
+
 export async function deleteOwnAccount(uid) {
   const batch = writeBatch(db);
   const txSnap = await getDocs(collection(db, 'users', uid, 'transactions'));
