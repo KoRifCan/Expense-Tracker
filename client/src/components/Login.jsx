@@ -37,6 +37,15 @@ export default function Login({ onSwitch }) {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotError, setForgotError] = useState('');
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const [disabledMsg, setDisabledMsg] = useState('');
+
+  useEffect(() => {
+    const flag = localStorage.getItem('accountDisabled');
+    if (flag === 'true') {
+      setDisabledMsg('Akun kamu telah dinonaktifkan oleh admin. Silakan hubungi admin untuk informasi lebih lanjut.');
+      localStorage.removeItem('accountDisabled');
+    }
+  }, []);
   const forgotEmailRef = useRef(null);
 
   useEffect(() => {
@@ -254,6 +263,21 @@ export default function Login({ onSwitch }) {
         <form onSubmit={handleEmailLogin} className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm p-8 rounded-2xl shadow-xl">
           <h2 className="text-2xl font-semibold mb-6 text-center dark:text-white">Masuk</h2>
           <ErrorMessage message={error} onClose={() => setError('')} />
+          {disabledMsg && (
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-3 mb-4 flex items-start gap-3">
+              <svg className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H10m9.364-7.364A9 9 0 1112 3a9 9 0 017.364 4.636z" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm text-red-700 dark:text-red-300">{disabledMsg}</p>
+              </div>
+              <button onClick={() => setDisabledMsg('')} className="text-red-400 hover:text-red-600 shrink-0">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
           {unverifiedEmail && (
             <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-xl p-3 mb-4 flex items-start gap-3">
               <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

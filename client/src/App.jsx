@@ -21,7 +21,12 @@ export default function App() {
   const verifyRole = async (u) => {
     if (!u) return;
     const data = await getUser(u.uid);
-    if (!data || data.disabled) {
+    if (!data) {
+      await auth.signOut();
+      return;
+    }
+    if (data.disabled) {
+      localStorage.setItem('accountDisabled', 'true');
       await auth.signOut();
       return;
     }
@@ -33,6 +38,7 @@ export default function App() {
       if (u) {
         const data = await getUser(u.uid);
         if (data?.disabled) {
+          localStorage.setItem('accountDisabled', 'true');
           await auth.signOut();
           return;
         }
