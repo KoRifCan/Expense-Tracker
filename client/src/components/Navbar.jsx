@@ -1,6 +1,6 @@
 import ThemeToggle from './ThemeToggle';
 
-export default function Navbar({ dark, onToggleTheme, children }) {
+export default function Navbar({ dark, onToggleTheme, photoURL, children }) {
   return (
     <nav className="relative flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 gap-2">
       <div className="flex items-center gap-2 min-w-0">
@@ -13,6 +13,11 @@ export default function Navbar({ dark, onToggleTheme, children }) {
       </div>
       <div className="flex items-center gap-1 sm:gap-2 min-w-0">
         <ThemeToggle dark={dark} onToggle={onToggleTheme} />
+        {photoURL ? (
+          <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 ring-2 ring-white/30">
+            <img src={photoURL} alt="" className="w-full h-full object-cover" />
+          </div>
+        ) : null}
         {children}
       </div>
     </nav>

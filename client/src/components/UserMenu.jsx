@@ -4,7 +4,7 @@ import { auth } from '../firebase/config';
 import AboutModal from './AboutModal';
 import SettingsModal from './SettingsModal';
 
-export default function UserMenu({ user, dark, onToggleTheme }) {
+export default function UserMenu({ user, dark, onToggleTheme, photoURL }) {
   const [open, setOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -64,8 +64,12 @@ export default function UserMenu({ user, dark, onToggleTheme }) {
         {open && (
           <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50">
             <div className="flex items-center gap-3 px-3 py-3 border-b border-gray-100 dark:border-gray-700">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
-                {(user.displayName || user.email || '?')[0].toUpperCase()}
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold shrink-0 overflow-hidden">
+                {photoURL ? (
+                  <img src={photoURL} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  (user.displayName || user.email || '?')[0].toUpperCase()
+                )}
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.displayName || 'Pengguna'}</p>

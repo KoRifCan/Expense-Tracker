@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { auth } from '../firebase/config';
 import * as txns from '../api/transactions';
+import { getUser } from '../api/users';
 import TransactionForm from './TransactionForm';
 import TransactionList from './TransactionList';
 import ExpenseChart from './ExpenseChart';
@@ -73,9 +74,19 @@ export default function Dashboard({ user }) {
   const [catFilter, setCatFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [dark, setDark] = useTheme();
+  const [photoURL, setPhotoURL] = useState(localStorage.getItem('photoURL') || '');
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const perPage = 10;
+
+  useEffect(() => {
+    getUser(user.uid).then((u) => {
+      if (u?.photoURL) {
+        setPhotoURL(u.photoURL);
+        localStorage.setItem('photoURL', u.photoURL);
+      }
+    }).catch(() => {});
+  }, [user.uid]);
 
   const { toast, show: showToast, setToast } = useToast();
 
@@ -183,8 +194,8 @@ export default function Dashboard({ user }) {
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700" />
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
-        <Navbar dark={dark} onToggleTheme={() => setDark(!dark)}>
-          <UserMenu user={user} dark={dark} onToggleTheme={() => setDark(!dark)} />
+        <Navbar dark={dark} onToggleTheme={() => setDark(!dark)} photoURL={photoURL}>
+          <UserMenu user={user} dark={dark} onToggleTheme={() => setDark(!dark)} photoURL={photoURL} />
         </Navbar>
       </div>
 
