@@ -6,6 +6,17 @@ import {
   EmailAuthProvider,
 } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase/config';
+import { createUser, getUser } from '../api/users';
+
+async function ensureUserDoc(user) {
+  const existing = await getUser(user.uid);
+  if (!existing) {
+    await createUser(user.uid, {
+      name: user.displayName || user.email.split('@')[0],
+      email: user.email,
+    });
+  }
+}
 
 export default function Login({ onSwitch }) {
   const [email, setEmail] = useState('');
@@ -20,7 +31,8 @@ export default function Login({ onSwitch }) {
     setError('');
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      await ensureUserDoc(cred.user);
     } catch (err) {
       if (err.code === 'auth/invalid-credential') {
         setError('Email atau password salah');
@@ -39,6 +51,7 @@ export default function Login({ onSwitch }) {
     try {
       const result = await signInWithEmailAndPassword(auth, pendingEmail, password);
       await linkWithCredential(result.user, pendingCred);
+      await ensureUserDoc(result.user);
       setPendingCred(null);
       setPendingEmail('');
     } catch (err) {
@@ -51,12 +64,12 @@ export default function Login({ onSwitch }) {
   const handleGoogleLogin = async () => {
     setError('');
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      await ensureUserDoc(result.user);
     } catch (err) {
       if (err.code === 'auth/account-exists-with-different-credential') {
         setPendingCred(err.credential);
         setPendingEmail(err.email);
-        setError('');
       } else if (err.code !== 'auth/popup-closed-by-user') {
         setError(err.message);
       }
@@ -65,9 +78,9 @@ export default function Login({ onSwitch }) {
 
   if (pendingCred) {
     return (
-      <div className="bg-white p-8 rounded-xl shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Hubungkan Akun</h2>
-        <p className="text-sm text-gray-600 mb-4">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
+        <h2 className="text-xl font-semibold mb-4 dark:text-white">Hubungkan Akun</h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           Email <strong>{pendingEmail}</strong> sudah terdaftar dengan password.
           Masukkan password untuk menghubungkan akun Google.
         </p>
@@ -76,20 +89,17 @@ export default function Login({ onSwitch }) {
           <input
             type="password"
             placeholder="Password"
-            className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button
-            type="submit"
-            disabled={loading}
+          <button type="submit" disabled={loading}
             className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 mb-2"
           >
             {loading ? 'Memproses...' : 'Hubungkan'}
           </button>
-          <button
-            type="button"
+          <button type="button"
             onClick={() => { setPendingCred(null); setPendingEmail(''); setPassword(''); }}
             className="w-full text-sm text-gray-500 hover:underline"
           >
@@ -102,13 +112,13 @@ export default function Login({ onSwitch }) {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleEmailLogin} className="bg-white p-8 rounded-xl shadow-md">
-        <h2 className="text-2xl font-semibold mb-6 text-center">Masuk</h2>
+      <form onSubmit={handleEmailLogin} className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
+        <h2 className="text-2xl font-semibold mb-6 text-center dark:text-white">Masuk</h2>
         {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
         <input
           type="email"
           placeholder="Email"
-          className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -116,19 +126,17 @@ export default function Login({ onSwitch }) {
         <input
           type="password"
           placeholder="Password"
-          className="w-full p-3 border rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full p-3 border rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button
-          type="submit"
-          disabled={loading}
+        <button type="submit" disabled={loading}
           className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
         >
           {loading ? 'Memproses...' : 'Masuk'}
         </button>
-        <p className="text-center mt-4 text-sm text-gray-600">
+        <p className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
           Belum punya akun?{' '}
           <button type="button" onClick={onSwitch} className="text-blue-600 hover:underline">
             Daftar
@@ -138,16 +146,16 @@ export default function Login({ onSwitch }) {
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300" />
+          <div className="w-full border-t border-gray-300 dark:border-gray-600" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="bg-gray-100 px-2 text-gray-500">atau</span>
+          <span className="bg-gray-100 dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">atau</span>
         </div>
       </div>
 
       <button
         onClick={handleGoogleLogin}
-        className="w-full bg-white text-gray-700 p-3 rounded-lg border border-gray-300 hover:bg-gray-50 flex items-center justify-center gap-2"
+        className="w-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 p-3 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>

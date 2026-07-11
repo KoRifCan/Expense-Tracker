@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import { createUser } from '../api/users';
 
 export default function Register({ onSwitch }) {
   const [name, setName] = useState('');
@@ -16,6 +17,7 @@ export default function Register({ onSwitch }) {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName: name });
+      await createUser(cred.user.uid, { name, email });
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') {
         setError('Email sudah terdaftar');
@@ -30,13 +32,13 @@ export default function Register({ onSwitch }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-md">
-      <h2 className="text-2xl font-semibold mb-6 text-center">Daftar</h2>
+    <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
+      <h2 className="text-2xl font-semibold mb-6 text-center dark:text-white">Daftar</h2>
       {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
       <input
         type="text"
         placeholder="Nama"
-        className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
         value={name}
         onChange={(e) => setName(e.target.value)}
         required
@@ -44,7 +46,7 @@ export default function Register({ onSwitch }) {
       <input
         type="email"
         placeholder="Email"
-        className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -52,7 +54,7 @@ export default function Register({ onSwitch }) {
       <input
         type="password"
         placeholder="Password (min 6 karakter)"
-        className="w-full p-3 border rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-full p-3 border rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         minLength={6}
@@ -65,7 +67,7 @@ export default function Register({ onSwitch }) {
       >
         {loading ? 'Memproses...' : 'Daftar'}
       </button>
-      <p className="text-center mt-4 text-sm text-gray-600">
+      <p className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
         Sudah punya akun?{' '}
         <button type="button" onClick={onSwitch} className="text-blue-600 hover:underline">
           Masuk
