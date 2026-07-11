@@ -5,7 +5,7 @@ const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'
 export default function ExpenseChart({ categories }) {
   if (!categories || categories.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md text-center text-gray-400 text-sm">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md text-center text-gray-400 text-sm flex items-center justify-center h-[278px]">
         Belum ada data pengeluaran bulan ini
       </div>
     );
@@ -14,7 +14,7 @@ export default function ExpenseChart({ categories }) {
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
       <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Grafik Pengeluaran</h3>
-      <ResponsiveContainer width="100%" height={250}>
+      <ResponsiveContainer width="100%" height={280}>
         <PieChart>
           <Pie
             data={categories}
@@ -23,14 +23,18 @@ export default function ExpenseChart({ categories }) {
             cx="50%"
             cy="50%"
             outerRadius={80}
+            labelLine={true}
             label={({ category, percent }) => `${category} ${(percent * 100).toFixed(0)}%`}
           >
             {categories.map((_, i) => (
               <Cell key={i} fill={COLORS[i % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(v) => `Rp${v.toLocaleString('id-ID')}`} />
-          <Legend />
+          <Tooltip
+            contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
+            formatter={(v) => `Rp${v.toLocaleString('id-ID')}`}
+          />
+          <Legend wrapperStyle={{ fontSize: 11 }} />
         </PieChart>
       </ResponsiveContainer>
     </div>

@@ -23,14 +23,18 @@ export default function IncomeChart({ categories }) {
             cx="50%"
             cy="50%"
             outerRadius={80}
+            labelLine={true}
             label={({ category, percent }) => `${category} ${(percent * 100).toFixed(0)}%`}
           >
             {categories.map((_, i) => (
               <Cell key={i} fill={COLORS[i % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(v) => `Rp${v.toLocaleString('id-ID')}`} />
-          <Legend />
+          <Tooltip
+            contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
+            formatter={(v) => `Rp${v.toLocaleString('id-ID')}`}
+          />
+          <Legend wrapperStyle={{ fontSize: 11 }} />
         </PieChart>
       </ResponsiveContainer>
     </div>
