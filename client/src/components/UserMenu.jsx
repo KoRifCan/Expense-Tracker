@@ -51,31 +51,31 @@ export default function UserMenu({ user, onProfileSaved }) {
   return (
     <>
       <div className="relative shrink-0" ref={menuRef}>
-        <div className="flex items-center gap-1 sm:gap-2">
-          <span className="text-[11px] sm:text-xs text-white/70 hidden sm:block truncate max-w-[80px]">
-            {user.displayName || user.email?.split('@')[0] || 'Akun'}
-          </span>
-          <button
-            onClick={() => setOpen(!open)}
-            className="p-1.5 rounded-lg hover:bg-white/10 active:bg-white/20 transition text-white"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
+        <button
+          onClick={() => setOpen(!open)}
+          className="p-1.5 rounded-lg hover:bg-white/10 active:bg-white/20 transition text-white"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
 
         {open && (
-          <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-[100]">
-            <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
-              <p className="text-xs font-medium text-gray-900 dark:text-white truncate">{user.displayName || 'Pengguna'}</p>
-              <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+          <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50">
+            <div className="flex items-center gap-3 px-3 py-3 border-b border-gray-100 dark:border-gray-700">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                {(user.displayName || user.email || '?')[0].toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.displayName || 'Pengguna'}</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+              </div>
             </div>
             {menu.map((item) => (
               <button
                 key={item.label}
                 onClick={item.onClick}
-                className="w-full flex items-center gap-3 px-3 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition text-left"
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition text-left"
               >
                 <span className="text-gray-400 dark:text-gray-500 shrink-0">{item.icon}</span>
                 {item.label}
@@ -84,6 +84,8 @@ export default function UserMenu({ user, onProfileSaved }) {
           </div>
         )}
       </div>
+
+      {open && <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />}
 
       {showProfile && <ProfileModal user={user} onClose={() => setShowProfile(false)} onSaved={onProfileSaved} />}
       {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
