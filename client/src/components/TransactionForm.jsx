@@ -9,20 +9,31 @@ import ErrorMessage from './ErrorMessage';
 
 export default function TransactionForm({ onSubmit, initialData, onCancel }) {
   const [type, setType] = useState(initialData?.type || 'expense');
-  const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
+  const [amount, setAmount] = useState(initialData ? Number(initialData.amount).toLocaleString('id-ID') : '');
   const [category, setCategory] = useState(initialData?.category || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [date, setDate] = useState(initialData?.date || new Date().toISOString().split('T')[0]);
   const [error, setError] = useState('');
 
+  const handleAmountChange = (e) => {
+    const raw = e.target.value.replace(/[^0-9]/g, '');
+    if (raw === '') { setAmount(''); return; }
+    setAmount(parseInt(raw, 10).toLocaleString('id-ID'));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
+    const rawAmount = parseFloat(amount.replace(/\./g, ''));
     if (!amount || !category || !date) {
       setError('Jumlah, kategori, dan tanggal harus diisi');
       return;
     }
-    onSubmit({ type, amount: parseFloat(amount), category, description, date });
+    if (isNaN(rawAmount) || rawAmount <= 0) {
+      setError('Jumlah harus lebih dari 0');
+      return;
+    }
+    onSubmit({ type, amount: rawAmount, category, description, date });
     if (!initialData) {
       setAmount('');
       setCategory('');
@@ -55,9 +66,9 @@ export default function TransactionForm({ onSubmit, initialData, onCancel }) {
       <div className="space-y-4">
         <div className="relative">
           <span className="absolute left-3 top-3.5 text-gray-400 text-sm">Rp</span>
-          <input type="number" step="0.01" placeholder="0"
+          <input type="text" inputMode="numeric" placeholder="0"
             className="w-full pl-10 p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white transition"
-            value={amount} onChange={(e) => setAmount(e.target.value)} required />
+            value={amount} onChange={handleAmountChange} required />
         </div>
         <select
           className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white transition"
