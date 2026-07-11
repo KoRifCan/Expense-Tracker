@@ -1,5 +1,5 @@
 import { db } from '../firebase/config';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, deleteDoc, doc, writeBatch } from 'firebase/firestore';
 
 export async function getAllUsersWithTransactions() {
   const usersSnap = await getDocs(collection(db, 'users'));
@@ -17,4 +17,12 @@ export async function getAllUsersWithTransactions() {
   }
 
   return result;
+}
+
+export async function deleteUserAccount(uid) {
+  const batch = writeBatch(db);
+  const txSnap = await getDocs(collection(db, 'users', uid, 'transactions'));
+  txSnap.docs.forEach((d) => batch.delete(d.ref));
+  batch.delete(doc(db, 'users', uid));
+  await batch.commit();
 }

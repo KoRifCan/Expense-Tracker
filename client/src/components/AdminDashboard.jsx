@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { auth } from '../firebase/config';
 import * as txns from '../api/transactions';
-import { getAllUsersWithTransactions } from '../api/admin';
+import { getAllUsersWithTransactions, deleteUserAccount } from '../api/admin';
 import { setUserRole } from '../api/users';
 import TransactionForm from './TransactionForm';
 import TransactionList from './TransactionList';
@@ -83,6 +83,9 @@ export default function AdminDashboard({ user }) {
   const [usersLoading, setUsersLoading] = useState(true);
   const [expandedUser, setExpandedUser] = useState(null);
   const [tab, setTab] = useState('dashboard');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState('newest');
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   const { toast, show: showToast, setToast } = useToast();
 
@@ -167,6 +170,29 @@ export default function AdminDashboard({ user }) {
     }
   };
 
+  const handleDeleteAccount = async (uid) => {
+    try {
+      await deleteUserAccount(uid);
+      showToast('Akun berhasil dihapus', 'success');
+      setConfirmDelete(null);
+      loadUsers();
+    } catch {
+      showToast('Gagal menghapus akun', 'error');
+    }
+  };
+
+  const filteredUsers = users
+    .filter((u) => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+    })
+    .sort((a, b) => {
+      const dateA = a.createdAt || '';
+      const dateB = b.createdAt || '';
+      return sortOrder === 'newest' ? dateB.localeCompare(dateA) : dateA.localeCompare(dateB);
+    });
+
   const filtered = data.filter((t) => {
     if (catFilter && t.category !== catFilter) return false;
     if (typeFilter && t.type !== typeFilter) return false;
@@ -198,7 +224,7 @@ export default function AdminDashboard({ user }) {
   return (
     <div className={`min-h-screen ${dark ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
       <div className="relative">
-        <div className={`absolute inset-0 ${tab === 'admin' ? 'bg-gradient-to-br from-purple-500 via-purple-600 to-pink-700' : 'bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700'}`} />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700" />
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
         <Navbar dark={dark} onToggleTheme={() => setDark(!dark)}>
           <UserMenu user={user} onProfileSaved={() => {}} />
@@ -206,11 +232,11 @@ export default function AdminDashboard({ user }) {
       </div>
 
       <div className="max-w-6xl mx-auto p-3 sm:p-4">
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-1 bg-white/15 backdrop-blur-sm rounded-2xl p-1 mb-4 w-fit">
           <button
             onClick={() => setTab('dashboard')}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition shadow-sm ${
-              tab === 'dashboard' ? 'bg-white text-blue-600 shadow' : 'bg-white/20 text-white hover:bg-white/30'
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition ${
+              tab === 'dashboard' ? 'bg-white text-blue-600 shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'
             }`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,8 +246,8 @@ export default function AdminDashboard({ user }) {
           </button>
           <button
             onClick={() => setTab('admin')}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition shadow-sm ${
-              tab === 'admin' ? 'bg-white text-purple-600 shadow' : 'bg-white/20 text-white hover:bg-white/30'
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition ${
+              tab === 'admin' ? 'bg-white text-blue-600 shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'
             }`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -420,20 +446,43 @@ export default function AdminDashboard({ user }) {
         ) : (
           <>
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-4 sm:px-6 py-4 sm:py-5">
-                <div className="flex items-center justify-between">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-4 sm:px-6 py-4 sm:py-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h2 className="text-lg sm:text-xl font-bold text-white">Panel Admin</h2>
-                    <p className="text-purple-100 text-xs sm:text-sm mt-0.5">Kelola semua pengguna ({users.length} total)</p>
+                    <p className="text-blue-100 text-xs sm:text-sm mt-0.5">{users.length} pengguna terdaftar</p>
                   </div>
                   <button
                     onClick={loadUsers}
-                    className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm px-3 py-1.5 rounded-lg transition"
+                    className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm px-3 py-1.5 rounded-lg transition self-start"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     Refresh
+                  </button>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 mt-3">
+                  <div className="relative flex-1">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Cari pengguna..."
+                      className="w-full pl-9 pr-3 py-2 bg-white/20 text-white placeholder-white/50 text-sm rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+                    className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm px-3 py-2 rounded-lg transition self-start sm:self-auto"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                    </svg>
+                    {sortOrder === 'newest' ? 'Terbaru' : 'Terlama'}
                   </button>
                 </div>
               </div>
@@ -445,35 +494,28 @@ export default function AdminDashboard({ user }) {
                       <div key={i} className="animate-pulse bg-gray-100 dark:bg-gray-700 h-16 rounded-xl" />
                     ))}
                   </div>
-                ) : users.length === 0 ? (
+                ) : filteredUsers.length === 0 ? (
                   <div className="text-center py-12">
                     <svg className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">Belum ada pengguna</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">Tidak ada pengguna ditemukan</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <div className="hidden sm:grid grid-cols-12 gap-2 px-4 py-2 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                      <div className="col-span-4">Pengguna</div>
-                      <div className="col-span-2 text-center">Pemasukan</div>
-                      <div className="col-span-2 text-center">Pengeluaran</div>
-                      <div className="col-span-2 text-center">Saldo</div>
-                      <div className="col-span-2 text-center">Aksi</div>
-                    </div>
-                    {users.map((u) => {
+                    {filteredUsers.map((u) => {
                       const isExpanded = expandedUser === u.uid;
                       return (
                         <div key={u.uid} className="bg-gray-50 dark:bg-gray-700/50 rounded-xl transition hover:shadow-sm">
                           <div
                             onClick={() => setExpandedUser(isExpanded ? null : u.uid)}
-                            className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-0 items-center px-3 sm:px-4 py-3 cursor-pointer"
+                            className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 px-3 sm:px-4 py-3 cursor-pointer"
                           >
-                            <div className="col-span-4 flex items-center gap-2.5 min-w-0">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
                                 {(u.name || u.email || '?')[0].toUpperCase()}
                               </div>
-                              <div className="min-w-0">
+                              <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-sm font-medium dark:text-white truncate">{u.name || 'Tanpa Nama'}</span>
                                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${u.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'}`}>
@@ -483,34 +525,36 @@ export default function AdminDashboard({ user }) {
                                 <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate">{u.email}</p>
                               </div>
                             </div>
-                            <div className="sm:col-span-2 text-left sm:text-center">
-                              <span className="sm:hidden text-[10px] text-gray-400 mr-1">Masuk:</span>
-                              <span className="text-sm font-semibold text-green-600">{formatMoney(u.totalIncome)}</span>
-                            </div>
-                            <div className="sm:col-span-2 text-left sm:text-center">
-                              <span className="sm:hidden text-[10px] text-gray-400 mr-1">Keluar:</span>
-                              <span className="text-sm font-semibold text-red-600">{formatMoney(u.totalExpense)}</span>
-                            </div>
-                            <div className="sm:col-span-2 text-left sm:text-center">
-                              <span className="sm:hidden text-[10px] text-gray-400 mr-1">Saldo:</span>
-                              <span className={`text-sm font-semibold ${(u.totalIncome - u.totalExpense) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                                {formatMoney(u.totalIncome - u.totalExpense)}
-                              </span>
-                            </div>
-                            <div className="sm:col-span-2 flex justify-start sm:justify-center gap-1">
-                              <button
-                                onClick={(e) => { e.stopPropagation(); handleToggleRole(u.uid, u.role); }}
-                                className={`text-[11px] px-2.5 py-1 rounded-lg font-medium transition ${
-                                  u.role === 'admin'
-                                    ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                    : 'bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400'
-                                }`}
-                              >
-                                {u.role === 'admin' ? 'Turunkan' : 'Promosi'}
-                              </button>
-                              <svg className={`w-4 h-4 text-gray-400 transition-transform self-center ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
+                            <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm ml-10 sm:ml-0">
+                              <div className="text-left sm:text-center">
+                                <span className="sm:hidden text-[10px] text-gray-400 mr-1">Masuk:</span>
+                                <span className="font-semibold text-green-600">+{formatMoney(u.totalIncome)}</span>
+                              </div>
+                              <div className="text-left sm:text-center">
+                                <span className="sm:hidden text-[10px] text-gray-400 mr-1">Keluar:</span>
+                                <span className="font-semibold text-red-600">-{formatMoney(u.totalExpense)}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleToggleRole(u.uid, u.role); }}
+                                  className={`text-[11px] px-2 py-1 rounded-lg font-medium transition ${
+                                    u.role === 'admin'
+                                      ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400'
+                                  }`}
+                                >
+                                  {u.role === 'admin' ? 'Turunkan' : 'Promosi'}
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setConfirmDelete(u.uid); }}
+                                  className="text-[11px] px-2 py-1 rounded-lg font-medium bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 transition"
+                                >
+                                  Hapus
+                                </button>
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </div>
                             </div>
                           </div>
 
@@ -555,6 +599,32 @@ export default function AdminDashboard({ user }) {
                 )}
               </div>
             </div>
+
+            {confirmDelete && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/50" onClick={() => setConfirmDelete(null)} />
+                <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full shadow-xl">
+                  <h3 className="text-base font-semibold dark:text-white mb-2">Hapus Akun</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Semua data pengguna ini akan dihapus permanen. Yakin?
+                  </p>
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={() => setConfirmDelete(null)}
+                      className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={() => handleDeleteAccount(confirmDelete)}
+                      className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
 
