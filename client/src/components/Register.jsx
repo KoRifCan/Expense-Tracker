@@ -103,7 +103,7 @@ export default function Register({ onSwitch }) {
             />
             <button
               type="button"
-              onPointerDown={(e) => { e.preventDefault(); const el = passwordRef.current; const pos = el?.selectionStart ?? 0; setShowPass(s => !s); requestAnimationFrame(() => { el?.focus(); el?.setSelectionRange(pos, pos); }); }}
+              onPointerDown={(e) => { e.preventDefault(); const el = passwordRef.current; const focused = document.activeElement === el; const pos = el?.selectionStart ?? 0; setShowPass(s => !s); if (focused) requestAnimationFrame(() => { el?.focus(); el?.setSelectionRange(pos, pos); }); }}
               className="absolute right-1 top-1 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition"
             >
               {showPass ? (
