@@ -11,6 +11,10 @@ export default function useTheme() {
   const [dark, setDarkState] = useState(getInitial);
 
   useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+  }, []);
+
+  useEffect(() => {
     const handler = () => setDarkState(getInitial());
     window.addEventListener(THEME_EVENT, handler);
     return () => window.removeEventListener(THEME_EVENT, handler);
