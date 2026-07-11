@@ -34,19 +34,23 @@ export const getAll = async (uid, { month, year } = {}) => {
 export const getSummary = async (uid, { month, year } = {}) => {
   const txns = await getAll(uid, { month, year });
   let totalIncome = 0, totalExpense = 0;
-  const categoryMap = {};
+  const expenseMap = {};
+  const incomeMap = {};
 
   txns.forEach(t => {
-    if (t.type === 'income') totalIncome += t.amount;
-    else {
+    if (t.type === 'income') {
+      totalIncome += t.amount;
+      incomeMap[t.category] = (incomeMap[t.category] || 0) + t.amount;
+    } else {
       totalExpense += t.amount;
-      categoryMap[t.category] = (categoryMap[t.category] || 0) + t.amount;
+      expenseMap[t.category] = (expenseMap[t.category] || 0) + t.amount;
     }
   });
 
-  const categories = Object.entries(categoryMap).map(([category, total]) => ({ category, total }));
+  const categories = Object.entries(expenseMap).map(([category, total]) => ({ category, total }));
+  const incomeCategories = Object.entries(incomeMap).map(([category, total]) => ({ category, total }));
 
-  return { totalIncome, totalExpense, balance: totalIncome - totalExpense, categories };
+  return { totalIncome, totalExpense, balance: totalIncome - totalExpense, categories, incomeCategories };
 };
 
 export const create = async (uid, data) => {

@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { auth } from '../firebase/config';
 import * as txns from '../api/transactions';
 import TransactionForm from './TransactionForm';
 import TransactionList from './TransactionList';
 import ExpenseChart from './ExpenseChart';
+import IncomeChart from './IncomeChart';
+import CombinedChart from './CombinedChart';
 import ExportButton from './ExportButton';
 import Navbar from './Navbar';
 import UserMenu from './UserMenu';
@@ -12,45 +15,53 @@ import useTheme from '../hooks/useTheme';
 
 const CATEGORIES = ['Makanan', 'Transportasi', 'Belanja', 'Hiburan', 'Tagihan', 'Kesehatan', 'Pendidikan', 'Gaji', 'Freelance', 'Lainnya'];
 
-function DailyTrend({ transactions }) {
-  const days = Array.from({ length: 31 }, (_, i) => i + 1);
-  const dayData = days.map((d) => {
+const TrendChart = ({ transactions, dark }) => {
+  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+  const data = Array.from({ length: daysInMonth }, (_, i) => {
+    const d = i + 1;
     const dayTxns = transactions.filter((t) => {
       const day = parseInt(t.date?.split('-')[2], 10);
       return day === d;
     });
-    const income = dayTxns.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-    const expense = dayTxns.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-    return { day: String(d), income, expense, max: Math.max(income, expense, 1) };
+    return {
+      day: String(d),
+      Pemasukan: dayTxns.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0),
+      Pengeluaran: dayTxns.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0),
+    };
   });
-  const maxVal = Math.max(...dayData.map((d) => d.max), 1);
+
+  if (data.every((d) => d.Pemasukan === 0 && d.Pengeluaran === 0)) return null;
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
       <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Tren Harian (Bulan Ini)</h3>
-      <div className="flex items-end gap-[2px] h-20 sm:h-24 overflow-x-auto pb-1">
-        {dayData.slice(0, new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()).map((d) => (
-          <div key={d.day} className="flex flex-col items-center gap-[1px] min-w-[8px] flex-1">
-            <div className="w-full flex flex-col items-center" style={{ height: '100%' }}>
-              <div
-                className="w-full bg-green-400 dark:bg-green-500 rounded-t"
-                style={{ height: `${(d.income / maxVal) * 100}%`, minHeight: d.income > 0 ? 2 : 0 }}
-              />
-              <div
-                className="w-full bg-red-400 dark:bg-red-500 rounded-b"
-                style={{ height: `${(d.expense / maxVal) * 100}%`, minHeight: d.expense > 0 ? 2 : 0 }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-4 mt-2 text-xs text-gray-500">
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-green-400" /> Pemasukan</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-red-400" /> Pengeluaran</span>
-      </div>
+      <ResponsiveContainer width="100%" height={200}>
+        <AreaChart data={data}>
+          <defs>
+            <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke={dark ? '#374151' : '#e5e7eb'} />
+          <XAxis dataKey="day" tick={{ fontSize: 10, fill: dark ? '#9ca3af' : '#6b7280' }} interval={2} />
+          <YAxis tick={{ fontSize: 10, fill: dark ? '#9ca3af' : '#6b7280' }} />
+          <Tooltip
+            contentStyle={{ backgroundColor: dark ? '#1f2937' : '#fff', border: 'none', borderRadius: 8, color: dark ? '#f3f4f6' : '#111827' }}
+            formatter={(v) => `Rp${v.toLocaleString('id-ID')}`}
+          />
+          <Legend wrapperStyle={{ fontSize: 11, color: dark ? '#d1d5db' : '#6b7280' }} />
+          <Area type="monotone" dataKey="Pemasukan" stroke="#22c55e" fill="url(#incomeGrad)" strokeWidth={2} />
+          <Area type="monotone" dataKey="Pengeluaran" stroke="#ef4444" fill="url(#expenseGrad)" strokeWidth={2} />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   );
-}
+};
 
 export default function Dashboard({ user }) {
   const [data, setData] = useState([]);
@@ -277,9 +288,17 @@ export default function Dashboard({ user }) {
               </>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <IncomeChart categories={summary?.incomeCategories} />
               <ExpenseChart categories={summary?.categories} />
-              <DailyTrend transactions={data} />
+            </div>
+
+            <div className="mb-4">
+              <CombinedChart incomeCategories={summary?.incomeCategories} expenseCategories={summary?.categories} />
+            </div>
+
+            <div className="mb-6">
+              <TrendChart transactions={data} dark={dark} />
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md mb-6">
