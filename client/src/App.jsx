@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase/config';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { auth, db } from './firebase/config';
 import { getUser } from './api/users';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
@@ -16,22 +17,6 @@ export default function App() {
   const [page, setPage] = useState('login');
   const [dark, setDark] = useTheme();
   const [awaitingVerification, setAwaitingVerification] = useState(false);
-  const timerRef = useRef(null);
-
-  const verifyRole = async (u) => {
-    if (!u) return;
-    const data = await getUser(u.uid);
-    if (!data) {
-      await auth.signOut();
-      return;
-    }
-    if (data.disabled) {
-      localStorage.setItem('accountDisabled', 'true');
-      await auth.signOut();
-      return;
-    }
-    setUserData(data);
-  };
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -54,8 +39,21 @@ export default function App() {
 
   useEffect(() => {
     if (!user) return;
-    timerRef.current = setInterval(() => verifyRole(user), 30000);
-    return () => clearInterval(timerRef.current);
+    const unsub = onSnapshot(doc(db, 'users', user.uid), (snap) => {
+      if (!snap.exists()) {
+        localStorage.setItem('accountDisabled', 'true');
+        auth.signOut();
+        return;
+      }
+      const data = { uid: snap.id, ...snap.data() };
+      if (data.disabled) {
+        localStorage.setItem('accountDisabled', 'true');
+        auth.signOut();
+        return;
+      }
+      setUserData(data);
+    });
+    return unsub;
   }, [user]);
 
   if (loading) {
