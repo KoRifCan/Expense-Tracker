@@ -42,10 +42,27 @@ export default function SettingsModal({ onClose }) {
     setSaving(true);
     try {
       const dataUrl = await new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => resolve(r.result);
-        r.onerror = reject;
-        r.readAsDataURL(file);
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const max = 300;
+          const canvas = document.createElement('canvas');
+          const ratio = Math.min(max / img.width, max / img.height, 1);
+          canvas.width = Math.round(img.width * ratio);
+          canvas.height = Math.round(img.height * ratio);
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob((blob) => {
+            if (!blob) return reject(new Error('Gagal kompres'));
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.onerror = reject;
+            r.readAsDataURL(blob);
+          }, 'image/jpeg', 0.7);
+        };
+        img.onerror = reject;
+        img.src = url;
       });
       await updatePhotoURL(auth.currentUser.uid, dataUrl);
       localStorage.setItem('photoURL', dataUrl);
