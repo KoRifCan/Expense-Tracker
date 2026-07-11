@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { auth } from '../firebase/config';
 import * as txns from '../api/transactions';
 import { getAllUsersWithTransactions, deleteUserAccount, deleteUserTransactions, deleteAllUsersTransactions } from '../api/admin';
@@ -14,14 +14,11 @@ import Navbar from './Navbar';
 import UserMenu from './UserMenu';
 import Toast, { useToast } from './Toast';
 import useTheme from '../hooks/useTheme';
-import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
 const CATEGORIES = ['Makanan', 'Transportasi', 'Belanja', 'Hiburan', 'Tagihan', 'Kesehatan', 'Pendidikan', 'Gaji', 'Freelance', 'Lainnya'];
 
 function TrendChart({ transactions, dark }) {
-  const [tooltip, setTooltip] = useState(null);
-  const containerRef = useRef(null);
-
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
   const data = Array.from({ length: daysInMonth }, (_, i) => {
     const d = i + 1;
@@ -38,29 +35,11 @@ function TrendChart({ transactions, dark }) {
 
   if (data.every((d) => d.Pemasukan === 0 && d.Pengeluaran === 0)) return null;
 
-  const colors = { Pemasukan: '#22c55e', Pengeluaran: '#ef4444' };
-
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md chart-no-focus relative" ref={containerRef}>
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md chart-no-focus">
       <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Tren Harian (Bulan Ini)</h3>
       <ResponsiveContainer width="100%" height={200}>
-        <AreaChart
-          data={data}
-          onMouseMove={(state) => {
-            if (!containerRef.current || !state?.activePayload) return;
-            setTooltip({
-              x: state.activeCoordinate?.x || 0,
-              y: state.activeCoordinate?.y || 0,
-              label: state.activeLabel,
-              payload: state.activePayload.map((p) => ({
-                name: p.name,
-                value: p.value,
-                color: colors[p.name] || p.color,
-              })),
-            });
-          }}
-          onMouseLeave={() => setTooltip(null)}
-        >
+        <AreaChart data={data}>
           <defs>
             <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
@@ -75,23 +54,12 @@ function TrendChart({ transactions, dark }) {
           <XAxis dataKey="day" tick={{ fontSize: 10, fill: dark ? '#9ca3af' : '#6b7280' }} interval={2} />
           <YAxis tick={{ fontSize: 10, fill: dark ? '#9ca3af' : '#6b7280' }} />
           <Tooltip content={<ChartTooltip />} offset={8} />
+          <Tooltip content={<ChartTooltip />} />
           <Legend wrapperStyle={{ fontSize: 11, color: dark ? '#d1d5db' : '#6b7280' }} />
           <Area type="monotone" dataKey="Pemasukan" stroke="#22c55e" fill="url(#incomeGrad)" strokeWidth={2} />
           <Area type="monotone" dataKey="Pengeluaran" stroke="#ef4444" fill="url(#expenseGrad)" strokeWidth={2} />
         </AreaChart>
       </ResponsiveContainer>
-      {tooltip && (
-        <div
-          className="pointer-events-none absolute z-10"
-          style={{ left: tooltip.x, top: tooltip.y - 8, transform: 'translate(-50%, -100%)' }}
-        >
-          <ChartTooltip
-            active={true}
-            label={tooltip.label}
-            payload={tooltip.payload}
-          />
-        </div>
-      )}
     </div>
   );
 }
