@@ -23,7 +23,7 @@ export default function TransactionList({ transactions, onEdit, onDelete }) {
               </span>
               <span className="text-xs text-gray-500">{t.category}</span>
             </div>
-            <p className="font-medium">{t.description || t.category}</p>
+              <p className="font-medium truncate max-w-[160px] sm:max-w-none">{t.description || t.category}</p>
             <p className="text-xs text-gray-400">{formatDate(t.date)}</p>
           </div>
           <div className="text-right">
