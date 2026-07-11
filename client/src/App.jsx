@@ -32,7 +32,7 @@ export default function App() {
     const unsub = onAuthStateChanged(auth, async (u) => {
       if (u) {
         const data = await getUser(u.uid);
-        if (!data || data.disabled) {
+        if (data?.disabled) {
           await auth.signOut();
           return;
         }
