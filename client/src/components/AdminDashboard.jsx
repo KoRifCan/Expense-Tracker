@@ -233,11 +233,11 @@ export default function AdminDashboard({ user }) {
       </div>
 
       <div className="max-w-6xl mx-auto p-3 sm:p-4">
-        <div className="flex gap-1 bg-white/15 backdrop-blur-sm rounded-2xl p-1 mb-4 w-fit">
+        <div className="flex gap-1 bg-white/25 backdrop-blur-sm rounded-2xl p-1 mb-4 w-fit shadow-sm">
           <button
             onClick={() => setTab('dashboard')}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition ${
-              tab === 'dashboard' ? 'bg-white text-blue-600 shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'
+              tab === 'dashboard' ? 'bg-white text-blue-600 shadow-sm' : 'text-white hover:bg-white/20'
             }`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,7 +248,7 @@ export default function AdminDashboard({ user }) {
           <button
             onClick={() => setTab('admin')}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition ${
-              tab === 'admin' ? 'bg-white text-blue-600 shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'
+              tab === 'admin' ? 'bg-white text-blue-600 shadow-sm' : 'text-white hover:bg-white/20'
             }`}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -507,10 +507,10 @@ export default function AdminDashboard({ user }) {
                     {filteredUsers.map((u) => {
                       const isExpanded = expandedUser === u.uid;
                       return (
-                        <div key={u.uid} className="bg-gray-50 dark:bg-gray-700/50 rounded-xl transition hover:shadow-sm">
+                        <div key={u.uid} className="bg-gray-50 dark:bg-gray-700/50 rounded-xl transition hover:shadow-sm overflow-hidden">
                           <div
                             onClick={() => setExpandedUser(isExpanded ? null : u.uid)}
-                            className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 px-3 sm:px-4 py-3 cursor-pointer"
+                            className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-0 px-3 sm:px-4 py-2.5 sm:py-3 cursor-pointer"
                           >
                             <div className="flex items-center gap-2.5 min-w-0 flex-1">
                               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
@@ -526,15 +526,9 @@ export default function AdminDashboard({ user }) {
                                 <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate">{u.email}</p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm ml-10 sm:ml-0">
-                              <div className="text-left sm:text-center">
-                                <span className="sm:hidden text-[10px] text-gray-400 mr-1">Masuk:</span>
-                                <span className="font-semibold text-green-600">+{formatMoney(u.totalIncome)}</span>
-                              </div>
-                              <div className="text-left sm:text-center">
-                                <span className="sm:hidden text-[10px] text-gray-400 mr-1">Keluar:</span>
-                                <span className="font-semibold text-red-600">-{formatMoney(u.totalExpense)}</span>
-                              </div>
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs ml-10 sm:ml-0 mt-0.5 sm:mt-0">
+                              <span className="font-semibold text-green-600">+{formatMoney(u.totalIncome)}</span>
+                              <span className="font-semibold text-red-600">-{formatMoney(u.totalExpense)}</span>
                               <div className="flex items-center gap-1">
                                 <button
                                   onClick={(e) => { e.stopPropagation(); handleToggleRole(u.uid, u.role); }}
