@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { auth } from '../firebase/config';
 import * as txns from '../api/transactions';
-import { getAllUsersWithTransactions, deleteUserAccount } from '../api/admin';
+import { getAllUsersWithTransactions, deleteUserAccount, deleteUserTransactions, deleteAllUsersTransactions } from '../api/admin';
 import { setUserRole } from '../api/users';
 import TransactionForm from './TransactionForm';
 import TransactionList from './TransactionList';
@@ -120,6 +120,8 @@ export default function AdminDashboard({ user }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState('newest');
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [confirmDeleteTx, setConfirmDeleteTx] = useState(null);
+  const [confirmDeleteAllTx, setConfirmDeleteAllTx] = useState(false);
 
   const { toast, show: showToast, setToast } = useToast();
 
@@ -215,6 +217,28 @@ export default function AdminDashboard({ user }) {
     }
   };
 
+  const handleDeleteUserTx = async (uid) => {
+    try {
+      await deleteUserTransactions(uid);
+      showToast('Riwayat transaksi berhasil dihapus', 'success');
+      setConfirmDeleteTx(null);
+      loadUsers();
+    } catch {
+      showToast('Gagal menghapus riwayat transaksi', 'error');
+    }
+  };
+
+  const handleDeleteAllTx = async () => {
+    try {
+      await deleteAllUsersTransactions();
+      showToast('Semua riwayat transaksi berhasil dihapus', 'success');
+      setConfirmDeleteAllTx(false);
+      loadUsers();
+    } catch {
+      showToast('Gagal menghapus semua riwayat', 'error');
+    }
+  };
+
   const filteredUsers = users
     .filter((u) => {
       if (!searchQuery) return true;
@@ -261,7 +285,7 @@ export default function AdminDashboard({ user }) {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700" />
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
         <Navbar dark={dark} onToggleTheme={() => setDark(!dark)}>
-          <UserMenu user={user} onProfileSaved={() => {}} />
+          <UserMenu user={user} onProfileSaved={() => {}} dark={dark} onToggleTheme={() => setDark(!dark)} />
         </Navbar>
       </div>
 
@@ -486,15 +510,26 @@ export default function AdminDashboard({ user }) {
                     <h2 className="text-lg sm:text-xl font-bold text-white">Panel Admin</h2>
                     <p className="text-blue-100 text-xs sm:text-sm mt-0.5">{users.length} pengguna terdaftar</p>
                   </div>
-                  <button
-                    onClick={loadUsers}
-                    className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm px-3 py-1.5 rounded-lg transition self-start"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Refresh
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setConfirmDeleteAllTx(true)}
+                      className="flex items-center gap-1.5 bg-red-500/30 hover:bg-red-500/50 text-white text-xs sm:text-sm px-3 py-1.5 rounded-lg transition"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Hapus Semua Riwayat
+                    </button>
+                    <button
+                      onClick={loadUsers}
+                      className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm px-3 py-1.5 rounded-lg transition"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Refresh
+                    </button>
+                  </div>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 mt-3">
                   <div className="relative flex-1">
@@ -588,13 +623,23 @@ export default function AdminDashboard({ user }) {
 
                           {isExpanded && (
                             <div className="border-t border-gray-200 dark:border-gray-600 px-3 sm:px-4 py-3">
-                              <div className="flex items-center gap-2 mb-2">
-                                <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                  Riwayat Transaksi ({u.transactions.length})
-                                </p>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                  </svg>
+                                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                    Riwayat Transaksi ({u.transactions.length})
+                                  </p>
+                                </div>
+                                {u.transactions.length > 0 && (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setConfirmDeleteTx(u.uid); }}
+                                    className="text-[10px] px-2 py-1 rounded-lg font-medium bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 transition"
+                                  >
+                                    Hapus Riwayat
+                                  </button>
+                                )}
                               </div>
                               {u.transactions.length === 0 ? (
                                 <p className="text-xs text-gray-400 dark:text-gray-500 ml-5">Belum ada transaksi</p>
@@ -645,6 +690,58 @@ export default function AdminDashboard({ user }) {
                     </button>
                     <button
                       onClick={() => handleDeleteAccount(confirmDelete)}
+                      className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {confirmDeleteTx && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/50" onClick={() => setConfirmDeleteTx(null)} />
+                <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full shadow-xl">
+                  <h3 className="text-base font-semibold dark:text-white mb-2">Hapus Riwayat Transaksi</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Semua transaksi pengguna ini akan dihapus permanen. Akun tetap ada. Yakin?
+                  </p>
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={() => setConfirmDeleteTx(null)}
+                      className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={() => handleDeleteUserTx(confirmDeleteTx)}
+                      className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {confirmDeleteAllTx && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/50" onClick={() => setConfirmDeleteAllTx(false)} />
+                <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full shadow-xl">
+                  <h3 className="text-base font-semibold dark:text-white mb-2">Hapus Semua Riwayat</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Semua transaksi semua pengguna akan dihapus permanen. Akun tetap ada. Yakin?
+                  </p>
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={() => setConfirmDeleteAllTx(false)}
+                      className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={handleDeleteAllTx}
                       className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition"
                     >
                       Hapus
