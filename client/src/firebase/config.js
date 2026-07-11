@@ -3,12 +3,13 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_PROJECT.firebaseapp.com',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_PROJECT.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: 'AIzaSyAGcC9kbz2UbHOByD4CPq3vPnTCc9djyIo',
+  authDomain: 'expense-tracker-korifcan.firebaseapp.com',
+  projectId: 'expense-tracker-korifcan',
+  storageBucket: 'expense-tracker-korifcan.firebasestorage.app',
+  messagingSenderId: '680777959016',
+  appId: '1:680777959016:web:b2656cf97446e5ebb59ddd',
+  measurementId: 'G-YVXKN9K4YG',
 };
 
 const app = initializeApp(firebaseConfig);
