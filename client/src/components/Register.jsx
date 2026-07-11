@@ -1,8 +1,11 @@
 import { useState, useRef } from 'react';
 import {
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   updateProfile,
   signInWithPopup,
+  sendEmailVerification,
+  signOut,
 } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase/config';
 import { createUser } from '../api/users';
@@ -16,6 +19,8 @@ export default function Register({ onSwitch }) {
   const [error, setError] = useState('');
   const passwordRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +29,10 @@ export default function Register({ onSwitch }) {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName: name });
-      await createUser(cred.user.uid, { name, email });
+      await createUser(cred.user.uid, { name, email, emailVerified: false });
+      await sendEmailVerification(cred.user);
+      await signOut(auth);
+      setVerificationSent(true);
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') {
         setError('Email sudah terdaftar');
@@ -38,12 +46,25 @@ export default function Register({ onSwitch }) {
     }
   };
 
+  const handleResend = async () => {
+    setResending(true);
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      await sendEmailVerification(cred.user);
+      await signOut(auth);
+    } catch {
+      setError('Gagal mengirim ulang. Coba lagi nanti.');
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handleGoogleRegister = async () => {
     setError('');
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const name = result.user.displayName || result.user.email.split('@')[0];
-      await createUser(result.user.uid, { name, email: result.user.email });
+      await createUser(result.user.uid, { name, email: result.user.email, emailVerified: true });
     } catch (err) {
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Popup ditutup, yakin mau lewatin Google? Klik lagi aja');
@@ -54,6 +75,36 @@ export default function Register({ onSwitch }) {
       }
     }
   };
+
+  if (verificationSent) {
+    return (
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm p-8 rounded-2xl shadow-xl text-center">
+        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-semibold mb-2 dark:text-white">Cek Email Kamu</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          Email verifikasi sudah dikirim ke <strong className="text-gray-700 dark:text-gray-200">{email}</strong>.
+          Klik link di email untuk verifikasi, lalu login.
+        </p>
+        <button
+          onClick={onSwitch}
+          className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-xl hover:from-blue-600 hover:to-blue-700 font-medium transition mb-3"
+        >
+          Ke Halaman Login
+        </button>
+        <button
+          onClick={handleResend}
+          disabled={resending}
+          className="text-sm text-blue-600 hover:text-blue-700 font-medium transition disabled:opacity-50"
+        >
+          {resending ? 'Mengirim...' : 'Kirim ulang email verifikasi'}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
