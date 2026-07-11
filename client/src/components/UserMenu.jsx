@@ -1,13 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import ProfileModal from './ProfileModal';
 import AboutModal from './AboutModal';
 import SettingsModal from './SettingsModal';
 
-export default function UserMenu({ user, onProfileSaved, dark, onToggleTheme }) {
+export default function UserMenu({ user, dark, onToggleTheme }) {
   const [open, setOpen] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const menuRef = useRef(null);
@@ -30,15 +28,6 @@ export default function UserMenu({ user, onProfileSaved, dark, onToggleTheme }) 
         </svg>
       ),
       onClick: () => { setOpen(false); setShowSettings(true); },
-    },
-    {
-      label: 'Profil',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
-      onClick: () => { setOpen(false); setShowProfile(true); },
     },
     {
       label: 'Tentang',
@@ -99,9 +88,8 @@ export default function UserMenu({ user, onProfileSaved, dark, onToggleTheme }) 
 
       {open && <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />}
 
-      {showProfile && <ProfileModal user={user} onClose={() => setShowProfile(false)} onSaved={onProfileSaved} />}
       {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} dark={dark} onToggleTheme={onToggleTheme} />}
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
     </>
   );
 }

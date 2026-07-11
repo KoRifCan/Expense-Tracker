@@ -4,7 +4,29 @@ import { auth, storage } from '../firebase/config';
 import { deleteOwnAccount } from '../api/users';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-export default function SettingsModal({ onClose, dark, onToggleTheme }) {
+function compressImage(file, maxW = 300, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      const ratio = Math.min(maxW / img.width, maxW / img.height, 1);
+      canvas.width = Math.round(img.width * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        if (!blob) return reject(new Error('Gagal kompres'));
+        resolve(blob);
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+export default function SettingsModal({ onClose }) {
   const [tab, setTab] = useState('akun');
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
@@ -26,17 +48,23 @@ export default function SettingsModal({ onClose, dark, onToggleTheme }) {
   const handlePhoto = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showMsg('File terlalu besar. Maks 5MB.', 'error');
+      return;
+    }
     setSaving(true);
     try {
+      const compressed = await compressImage(file);
       const storageRef = ref(storage, `avatars/${auth.currentUser.uid}`);
-      await uploadBytes(storageRef, file);
+      await uploadBytes(storageRef, compressed);
       const url = await getDownloadURL(storageRef);
       await updateProfile(auth.currentUser, { photoURL: url });
       showMsg('Foto profil berhasil diubah');
-    } catch {
-      showMsg('Gagal mengubah foto profil', 'error');
+    } catch (err) {
+      showMsg('Gagal mengubah foto profil: ' + (err.message || ''), 'error');
     } finally {
       setSaving(false);
+      if (fileRef.current) fileRef.current.value = '';
     }
   };
 
@@ -158,7 +186,7 @@ export default function SettingsModal({ onClose, dark, onToggleTheme }) {
                     <button onClick={() => fileRef.current?.click()} disabled={saving} className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium transition">
                       {saving ? 'Mengupload...' : 'Ganti Foto'}
                     </button>
-                    <p className="text-[10px] text-gray-400 mt-1">Maks 5MB, format JPG/PNG</p>
+                    <p className="text-[10px] text-gray-400 mt-1">Maks 5MB | Dikompres otomatis</p>
                   </div>
                   <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
                 </div>
@@ -172,18 +200,6 @@ export default function SettingsModal({ onClose, dark, onToggleTheme }) {
                     {saving ? '...' : 'Simpan'}
                   </button>
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between py-3 px-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Tema Gelap</span>
-                </div>
-                <button onClick={onToggleTheme} className={`relative w-11 h-6 rounded-full transition-colors ${dark ? 'bg-blue-500' : 'bg-gray-300'}`}>
-                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${dark ? 'translate-x-5' : ''}`} />
-                </button>
               </div>
             </>
           )}

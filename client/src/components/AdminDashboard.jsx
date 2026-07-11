@@ -253,7 +253,7 @@ export default function AdminDashboard({ user }) {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700" />
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
         <Navbar dark={dark} onToggleTheme={() => setDark(!dark)}>
-          <UserMenu user={user} onProfileSaved={() => {}} dark={dark} onToggleTheme={() => setDark(!dark)} />
+          <UserMenu user={user} dark={dark} onToggleTheme={() => setDark(!dark)} />
         </Navbar>
       </div>
 
