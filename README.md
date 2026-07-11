@@ -1,58 +1,62 @@
-# 💰 Catatan Keuangan (Personal Expense Tracker)
+# 💰 Catatan Keuangan
 
-Aplikasi **Catatan Keuangan Pribadi** full-stack untuk mencatat pemasukan dan pengeluaran. Dibangun dengan **React + Firebase**, siap di-deploy ke **GitHub Pages** secara gratis.
+Aplikasi pencatat pemasukan & pengeluaran pribadi dengan panel admin, multi-user, dark mode, dan grafik interaktif.
 
 **🌐 Live Demo:** https://korifcan.github.io/Expense-Tracker/
 
 ---
 
-## ✨ Fitur Lengkap
+## ✨ Fitur
 
 ### 👤 Autentikasi
-- Login dengan **Email & Password**
-- Login dengan **Google** (satu klik)
-- **Account Linking** — jika daftar via email, bisa login via Google dan akun tetap sama
-- Data setiap user **terpisah dan aman**
+- Login Email/Password & Google (satu klik)
+- Account Linking (email + Google akun tetap sama)
+- Verifikasi email wajib
+- Auto-detect verifikasi email (tanpa reload)
 
 ### 📊 Dashboard
-- Ringkasan **pemasukan, pengeluaran, dan saldo** bulan ini
-- **Filter** berdasarkan bulan, tahun, dan kategori
-- **Grafik Pie Chart** — visualisasi pengeluaran per kategori
-- **Budget Planner** — progress bar perbandingan pengeluaran vs target (Rp1jt/kategori)
-- **Pagination** — otomatis jika transaksi lebih dari 10
+- Ringkasan pemasukan, pengeluaran, saldo, rata-rata/hari
+- Filter bulan, tahun, kategori, tipe (semua/pemasukan/pengeluaran)
+- Grafik interaktif: Pie (pemasukan, pengeluaran, gabungan), Area (tren harian)
+- Budget planner per kategori (progress bar)
+- Pagination otomatis
+- Export CSV
 
-### 💳 Manajemen Transaksi
-- **Tambah** transaksi (pemasukan/pengeluaran)
-- **Edit** transaksi yang sudah ada
-- **Hapus** transaksi
-- Pilih kategori (Makanan, Transportasi, Belanja, Hiburan, dll)
-- Input tanggal, jumlah, dan deskripsi
+### 💳 Transaksi
+- Tambah, edit, hapus transaksi
+- 10 kategori (Makanan, Transportasi, Belanja, dll)
+- Hapus semua riwayat dengan konfirmasi
 
-### 📁 Export Data
-- **Export CSV** — download semua transaksi terfilter ke file CSV
+### ⚙️ Pengaturan Akun
+- Foto profil (upload via base64, kompres otomatis, simpan di Firestore)
+- Ubah nama tampilan
+- Ubah email (dengan verifikasi ulang password + kirim verifikasi)
+- Ubah password (min 6 karakter, dengan verifikasi ulang)
+- Hapus akun (hapus semua data + auth)
 
-### 🎨 Tampilan
-- **Dark Mode** 🌙 / Light Mode ☀️ — toggle switch
-- **Responsive** — mobile, tablet, dan desktop
-- **Gradient UI** — navbar dan background gradien
-- **Animasi** — loading skeleton, fade-in, toast notification
-- Font Inter modern
+### 🌙 Tampilan
+- Dark/Light mode (toggle di navbar)
+- Responsive (mobile, tablet, desktop)
+- Gradient UI, skeleton loading, toast notification
 
-### 🔔 Notifikasi
-- **Toast Notification** — notifikasi sukses/error setiap aksi
-- **Error Message** — tampilan error yang menarik dengan icon
+### 👑 Panel Admin
+- Daftar semua pengguna (search + sort)
+- Lihat total pemasukan/pengeluaran tiap user
+- Expand detail transaksi tiap user
+- Promosi/turunkan role admin
+- **Nonaktifkan/aktifkan akun** user
+- Hapus akun user + transaksinya
+- Hapus semua riwayat transaksi semua user
 
-### 👑 Admin Panel (khusus admin)
-- Lihat **semua pengguna** yang terdaftar
-- Lihat **total pemasukan/pengeluaran** setiap user
-- **Expand** user untuk lihat detail transaksi
-- **Naikkan/turunkan role** admin
-- Dashboard admin dengan warna ungu khas
-
-### ⚙️ Lainnya
-- **Edit nama profil** — klik nama di navbar
-- Loading skeleton saat memuat data
-- Refresh data otomatis
+### 🔒 Keamanan
+- Firestore Security Rules ketat
+  - User hanya bisa baca/tulis data miliknya sendiri
+  - User tidak bisa mengubah `role` atau `disabled` sendiri
+  - Hanya admin yang bisa ubah role/status/nonaktifkan
+- Real-time `onSnapshot`:
+  - Role/status berubah → dashboard langsung beradaptasi
+  - Akun dinonaktifkan/dihapus → auto-logout instan
+- Notifikasi di halaman login jika akun dinonaktifkan
 
 ---
 
@@ -61,100 +65,42 @@ Aplikasi **Catatan Keuangan Pribadi** full-stack untuk mencatat pemasukan dan pe
 | Bagian | Teknologi |
 |--------|-----------|
 | **Frontend** | React 18, Vite, Tailwind CSS |
-| **Auth** | Firebase Authentication (Email + Google) |
-| **Database** | Firebase Firestore (NoSQL) |
-| **Chart** | Recharts (PieChart) |
-| **Deploy** | GitHub Pages |
+| **Auth** | Firebase Authentication |
+| **Database** | Cloud Firestore |
+| **Storage** | Base64 via Firestore (foto profil) |
+| **Chart** | Recharts (Pie, Area, Donut) |
+| **Deploy** | GitHub Actions → GitHub Pages |
 | **Font** | Inter (Google Fonts) |
 
 ---
 
-## 📋 Cara Setup Firebase
+## 🚀 Cara Menjalankan
 
-Aplikasi ini membutuhkan **Firebase project** untuk autentikasi dan database.
-
-### 1. Buat Project Firebase
-1. Buka https://console.firebase.google.com
-2. Klik **"Add project"** → nama `expense-tracker` → **Create** (matikan Analytics)
-
-### 2. Aktifkan Authentication
-1. Menu kiri → **Authentication** → **Get started**
-2. **Sign-in providers**:
-   - **Email/Password** → Enable → Save
-   - **Google** → Enable → pilih Support Email → Save
-3. **Settings** (gear) → **Authorized domains** → **Add domain**
-   - Tambahkan: `korifcan.github.io`
-
-### 3. Buat Firestore Database
-1. Menu kiri → **Firestore Database** → **Create database**
-2. Pilih **"Start in test mode"** → Next → Pilih region → Enable
-
-### 4. Atur Security Rules (PENTING!)
-Firestore → **Rules** → paste ini:
-
-```js
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
-      allow delete: if request.auth != null && request.auth.uid == userId;
-
-      match /transactions/{txId} {
-        allow read: if request.auth != null && (
-          request.auth.uid == userId ||
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
-        );
-        allow create: if request.auth != null && request.auth.uid == userId;
-        allow update: if request.auth != null && request.auth.uid == userId;
-        allow delete: if request.auth != null && request.auth.uid == userId;
-      }
-    }
-  }
-}
-```
-
-### 5. Ambil Config Firebase
-1. Project Settings (gear ⚙) → **General** → **Your apps**
-2. Klik Web `</>` → Register app → **Copy** config object
-
-### 6. Paste Config ke Kode
-Edit file **`client/src/firebase/config.js`** — ganti value placeholder dengan config kamu.
-
----
-
-## 🚀 Cara Deploy
-
-### Via npm (lokal)
 ```bash
-# Clone repo
 git clone https://github.com/KoRifCan/Expense-Tracker.git
 cd Expense-Tracker
 
-# Install dependencies
-cd client && npm install
-
-# Build & deploy ke GitHub Pages
-npm run deploy
+cd client
+npm install
+npm run dev
 ```
 
-### Via GitHub Actions (auto deploy)
-Setiap push ke branch `main` akan otomatis:
-1. Build aplikasi
-2. Deploy ke branch `gh-pages`
-3. Live di GitHub Pages
+### Setup Firebase
 
----
+1. Buat project di [Firebase Console](https://console.firebase.google.com)
+2. Aktifkan **Authentication** (Email/Password + Google)
+3. Buat **Firestore Database**
+4. Copy konfigurasi Firebase ke `client/src/firebase/config.js`
+5. Deploy **Firestore Rules** dari file `firestore.rules`
 
-## 🎯 Cara Jadi Admin
+### Deploy
 
-1. Register/login sebagai user biasa
-2. Buka Firebase Console → **Firestore** → **users** collection
-3. Cari dokumen dengan email kamu
-4. Ubah field `role` dari `"user"` menjadi `"admin"`
-5. Refresh aplikasi → otomatis masuk Admin Panel
+Push ke `main` → GitHub Actions otomatis build & deploy ke GitHub Pages.
+
+Atau manual:
+```bash
+npm run deploy
+```
 
 ---
 
@@ -162,46 +108,38 @@ Setiap push ke branch `main` akan otomatis:
 
 ```
 expense-tracker/
-├── client/                    # Frontend React
-│   ├── src/
-│   │   ├── api/
-│   │   │   ├── admin.js       # Admin API (semua user + transaksi)
-│   │   │   ├── transactions.js # API transaksi (CRUD via Firestore)
-│   │   │   └── users.js       # API user (create, get, role)
-│   │   ├── components/
-│   │   │   ├── AdminDashboard.jsx   # Dashboard admin
-│   │   │   ├── ErrorMessage.jsx     # Komponen error styling
-│   │   │   ├── ExpenseChart.jsx     # PieChart pengeluaran
-│   │   │   ├── ExportButton.jsx     # Tombol export CSV
-│   │   │   ├── Login.jsx            # Halaman login
-│   │   │   ├── Register.jsx         # Halaman daftar
-│   │   │   ├── ThemeToggle.jsx      # Toggle dark/light mode
-│   │   │   ├── Toast.jsx            # Toast notifikasi
-│   │   │   ├── TransactionForm.jsx  # Form tambah/edit transaksi
-│   │   │   ├── TransactionList.jsx  # Daftar transaksi
-│   │   │   └── UserDashboard.jsx    # Dashboard user
-│   │   ├── firebase/
-│   │   │   └── config.js       # Firebase config (isi sendiri)
-│   │   ├── App.jsx             # Root component
-│   │   ├── main.jsx            # Entry point
-│   │   └── index.css           # Global styles + animasi
-│   ├── index.html
-│   ├── vite.config.js
-│   ├── tailwind.config.js
-│   └── package.json
-├── firestore.rules             # Aturan keamanan Firestore
-├── .gitignore
-├── package.json                # Root scripts
-└── README.md                   # File ini
+├── client/src/
+│   ├── api/           # API calls ke Firestore
+│   │   ├── admin.js
+│   │   ├── transactions.js
+│   │   └── users.js
+│   ├── components/    # React components
+│   │   ├── AdminDashboard.jsx
+│   │   ├── ConfirmModal.jsx
+│   │   ├── Login.jsx
+│   │   ├── Navbar.jsx
+│   │   ├── Register.jsx
+│   │   ├── SettingsModal.jsx
+│   │   ├── UserDashboard.jsx
+│   │   ├── UserMenu.jsx
+│   │   └── ... (chart, form, list, toast, dll)
+│   ├── firebase/
+│   │   └── config.js
+│   ├── hooks/
+│   │   └── useTheme.js
+│   ├── App.jsx
+│   └── main.jsx
+├── firestore.rules    # Firestore security rules
+├── firebase.json
+└── README.md
 ```
 
 ---
 
-## 📄 Lisensi
+## 🤝 Kontribusi
 
-Proyek ini bersifat **open source**. Silakan gunakan, modifikasi, dan sebarkan.
+Pull request dipersilakan. Untuk perubahan besar, buka issue dulu.
 
 ---
 
-Dibuat dengan ❤️ oleh [KoRifCan](https://github.com/KoRifCan)
-
+Dibuat oleh [KoRifCan](https://github.com/KoRifCan)
