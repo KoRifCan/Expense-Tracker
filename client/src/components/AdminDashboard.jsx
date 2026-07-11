@@ -162,6 +162,9 @@ export default function AdminDashboard({ user, userData }) {
             );
           })}
         </div>
+        <p className="text-center text-xs text-gray-400 dark:text-gray-600 mt-6 pb-4">
+          &copy; {new Date().getFullYear()} Rifan Eko Candra Maulana
+        </p>
       </div>
       <Toast toast={toast} onClose={() => setToast(null)} />
     </div>

@@ -69,6 +69,9 @@ export default function App() {
         ) : (
           <Register onSwitch={() => setPage('login')} />
         )}
+        <p className="text-center text-xs text-white/50 mt-6">
+          &copy; {new Date().getFullYear()} Rifan Eko Candra Maulana
+        </p>
       </div>
     </div>
   );
