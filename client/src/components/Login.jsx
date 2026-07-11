@@ -37,15 +37,11 @@ export default function Login({ onSwitch }) {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotError, setForgotError] = useState('');
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
-  const [disabledMsg, setDisabledMsg] = useState('');
-
-  useEffect(() => {
-    const flag = localStorage.getItem('accountDisabled');
-    if (flag === 'true') {
-      setDisabledMsg('Akun kamu telah dinonaktifkan oleh admin. Silakan hubungi admin untuk informasi lebih lanjut.');
-      localStorage.removeItem('accountDisabled');
-    }
-  }, []);
+  const [disabledDismissed, setDisabledDismissed] = useState(false);
+  const disabledMsg = !disabledDismissed && localStorage.getItem('accountDisabled') === 'true'
+    ? 'Akun kamu telah dinonaktifkan oleh admin. Silakan hubungi admin untuk informasi lebih lanjut.'
+    : '';
+  if (disabledMsg) localStorage.removeItem('accountDisabled');
   const forgotEmailRef = useRef(null);
 
   useEffect(() => {
@@ -271,7 +267,7 @@ export default function Login({ onSwitch }) {
               <div className="flex-1">
                 <p className="text-sm text-red-700 dark:text-red-300">{disabledMsg}</p>
               </div>
-              <button onClick={() => setDisabledMsg('')} className="text-red-400 hover:text-red-600 shrink-0">
+              <button onClick={() => setDisabledDismissed(true)} className="text-red-400 hover:text-red-600 shrink-0">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
