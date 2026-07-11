@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -22,6 +22,26 @@ export default function Register({ onSwitch, setAwaitingVerification }) {
   const [loading, setLoading] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
   const [resending, setResending] = useState(false);
+  const [autoChecking, setAutoChecking] = useState(false);
+
+  useEffect(() => {
+    if (!verificationSent || !email || !password) return;
+    setAutoChecking(true);
+    const t = setInterval(async () => {
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        if (cred.user.emailVerified) {
+          clearInterval(t);
+          onSwitch();
+        } else {
+          await signOut(auth);
+        }
+      } catch {
+        // ignore
+      }
+    }, 5000);
+    return () => clearInterval(t);
+  }, [verificationSent]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,6 +119,15 @@ export default function Register({ onSwitch, setAwaitingVerification }) {
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">
           Klik link di email untuk verifikasi, lalu login. Jangan lupa cek folder spam ya!
         </p>
+        {autoChecking && (
+          <p className="text-xs text-green-600 dark:text-green-400 mb-4 flex items-center justify-center gap-1.5">
+            <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            Menunggu verifikasi email...
+          </p>
+        )}
         <button
           onClick={onSwitch}
           className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-xl hover:from-blue-600 hover:to-blue-700 font-medium transition mb-3"
