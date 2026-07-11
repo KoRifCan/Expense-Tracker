@@ -1,30 +1,7 @@
 import { useState, useRef } from 'react';
 import { updateProfile, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser, sendEmailVerification } from 'firebase/auth';
-import { auth, storage } from '../firebase/config';
+import { auth } from '../firebase/config';
 import { deleteOwnAccount } from '../api/users';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-
-function compressImage(file, maxW = 300, quality = 0.7) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const canvas = document.createElement('canvas');
-      const ratio = Math.min(maxW / img.width, maxW / img.height, 1);
-      canvas.width = Math.round(img.width * ratio);
-      canvas.height = Math.round(img.height * ratio);
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob((blob) => {
-        if (!blob) return reject(new Error('Gagal kompres'));
-        resolve(blob);
-      }, 'image/jpeg', quality);
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
-}
 
 export default function SettingsModal({ onClose }) {
   const [tab, setTab] = useState('akun');
@@ -54,14 +31,17 @@ export default function SettingsModal({ onClose }) {
     }
     setSaving(true);
     try {
-      const compressed = await compressImage(file);
-      const storageRef = ref(storage, `avatars/${auth.currentUser.uid}`);
-      await uploadBytes(storageRef, compressed);
-      const url = await getDownloadURL(storageRef);
-      await updateProfile(auth.currentUser, { photoURL: url });
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      await updateProfile(auth.currentUser, { photoURL: dataUrl });
       showMsg('Foto profil berhasil diubah');
     } catch (err) {
-      showMsg('Gagal mengubah foto profil: ' + (err.message || ''), 'error');
+      console.error('Upload error:', err);
+      showMsg('Gagal upload: ' + (err.message || ''), 'error');
     } finally {
       setSaving(false);
       if (fileRef.current) fileRef.current.value = '';
@@ -186,7 +166,7 @@ export default function SettingsModal({ onClose }) {
                     <button onClick={() => fileRef.current?.click()} disabled={saving} className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium transition">
                       {saving ? 'Mengupload...' : 'Ganti Foto'}
                     </button>
-                    <p className="text-[10px] text-gray-400 mt-1">Maks 5MB | Dikompres otomatis</p>
+                    <p className="text-[10px] text-gray-400 mt-1">Maks 5MB, format JPG/PNG</p>
                   </div>
                   <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
                 </div>
