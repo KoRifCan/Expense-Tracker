@@ -1,5 +1,5 @@
 import { db } from '../firebase/config';
-import { doc, setDoc, getDoc, getDocs, collection } from 'firebase/firestore';
+import { doc, setDoc, getDoc, getDocs, collection, writeBatch } from 'firebase/firestore';
 
 export async function createUser(uid, { name, email }) {
   await setDoc(doc(db, 'users', uid), {
@@ -23,4 +23,12 @@ export async function getAllUsers() {
 
 export async function setUserRole(uid, role) {
   await setDoc(doc(db, 'users', uid), { role }, { merge: true });
+}
+
+export async function deleteOwnAccount(uid) {
+  const batch = writeBatch(db);
+  const txSnap = await getDocs(collection(db, 'users', uid, 'transactions'));
+  txSnap.docs.forEach((d) => batch.delete(d.ref));
+  batch.delete(doc(db, 'users', uid));
+  await batch.commit();
 }
