@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 const THEME_KEY = 'theme';
+const TRANSITION_CLASS = 'theme-transitioning';
 
 function apply(val) {
   if (val) {
@@ -19,9 +20,19 @@ export default function useTheme() {
 
   const setDark = (next) => {
     const val = typeof next === 'function' ? next(dark) : next;
-    localStorage.setItem(THEME_KEY, val ? 'dark' : 'light');
-    apply(val);
-    setDarkState(val);
+    const html = document.documentElement;
+
+    html.classList.add(TRANSITION_CLASS);
+
+    requestAnimationFrame(() => {
+      localStorage.setItem(THEME_KEY, val ? 'dark' : 'light');
+      apply(val);
+      setDarkState(val);
+
+      setTimeout(() => {
+        html.classList.remove(TRANSITION_CLASS);
+      }, 200);
+    });
   };
 
   return [dark, setDark];
