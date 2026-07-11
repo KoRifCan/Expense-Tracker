@@ -103,7 +103,7 @@ export default function Register({ onSwitch }) {
             />
             <button
               type="button"
-              onMouseDown={(e) => { e.preventDefault(); setShowPass(s => !s); setTimeout(() => passwordRef.current?.focus(), 0); }}
+              onMouseDown={(e) => { e.preventDefault(); const el = passwordRef.current; const pos = el?.selectionStart ?? 0; setShowPass(s => !s); requestAnimationFrame(() => { el?.focus(); el?.setSelectionRange(pos, pos); }); }}
               className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition"
             >
               {showPass ? (
