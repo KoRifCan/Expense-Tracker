@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 
 const THEME_KEY = 'theme';
 
@@ -17,12 +17,12 @@ export default function useTheme() {
     return saved;
   });
 
-  const setDark = useCallback((next) => {
+  const setDark = (next) => {
     const val = typeof next === 'function' ? next(dark) : next;
     localStorage.setItem(THEME_KEY, val ? 'dark' : 'light');
     apply(val);
     setDarkState(val);
-  }, [dark]);
+  };
 
   return [dark, setDark];
 }
