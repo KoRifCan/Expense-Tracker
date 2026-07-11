@@ -13,6 +13,7 @@ import ExportButton from './ExportButton';
 import Navbar from './Navbar';
 import UserMenu from './UserMenu';
 import Toast, { useToast } from './Toast';
+import ConfirmModal from './ConfirmModal';
 import useTheme from '../hooks/useTheme';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
@@ -90,6 +91,8 @@ export default function AdminDashboard({ user }) {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [confirmDeleteTx, setConfirmDeleteTx] = useState(null);
   const [confirmDeleteAllTx, setConfirmDeleteAllTx] = useState(false);
+  const [confirmSingleDelete, setConfirmSingleDelete] = useState(null);
+  const [confirmOwnDeleteAll, setConfirmOwnDeleteAll] = useState(false);
 
   const { toast, show: showToast, setToast } = useToast();
 
@@ -153,13 +156,18 @@ export default function AdminDashboard({ user }) {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Hapus transaksi ini?')) return;
+    setConfirmSingleDelete(id);
+  };
+  const confirmSingleDeleteAction = async () => {
+    if (!confirmSingleDelete) return;
     try {
-      await txns.del(user.uid, id);
+      await txns.del(user.uid, confirmSingleDelete);
       showToast('Transaksi berhasil dihapus', 'success');
       loadData();
     } catch {
       showToast('Gagal menghapus transaksi', 'error');
+    } finally {
+      setConfirmSingleDelete(null);
     }
   };
 
@@ -448,16 +456,7 @@ export default function AdminDashboard({ user }) {
                 </button>
 
                 <button
-                  onClick={async () => {
-                    if (!confirm('Hapus seluruh riwayat transaksi? Tindakan ini tidak bisa dibatalkan.')) return;
-                    try {
-                      await txns.deleteAll(user.uid);
-                      showToast('Semua transaksi berhasil dihapus', 'success');
-                      loadData();
-                    } catch {
-                      showToast('Gagal menghapus transaksi', 'error');
-                    }
-                  }}
+                  onClick={() => setConfirmOwnDeleteAll(true)}
                   className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 dark:border-red-900/50 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 mb-4 font-medium transition"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -744,6 +743,31 @@ export default function AdminDashboard({ user }) {
           &copy; {new Date().getFullYear()} Rifan Eko Candra Maulana
         </p>
       </div>
+
+      <ConfirmModal
+        open={!!confirmSingleDelete}
+        title="Hapus Transaksi"
+        message="Hapus transaksi ini?"
+        onConfirm={confirmSingleDeleteAction}
+        onCancel={() => setConfirmSingleDelete(null)}
+      />
+      <ConfirmModal
+        open={confirmOwnDeleteAll}
+        title="Hapus Semua Transaksi"
+        message="Semua riwayat transaksi akan dihapus permanen. Yakin?"
+        onConfirm={async () => {
+          try {
+            await txns.deleteAll(user.uid);
+            showToast('Semua transaksi berhasil dihapus', 'success');
+            loadData();
+          } catch {
+            showToast('Gagal menghapus transaksi', 'error');
+          } finally {
+            setConfirmOwnDeleteAll(false);
+          }
+        }}
+        onCancel={() => setConfirmOwnDeleteAll(false)}
+      />
       <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
   );
