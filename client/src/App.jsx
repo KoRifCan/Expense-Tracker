@@ -9,6 +9,11 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState('login');
+  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+  }, [dark]);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
@@ -20,8 +25,8 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Memuat...</p>
+      <div className={`min-h-screen flex items-center justify-center ${dark ? 'bg-gray-900' : 'bg-gray-100'}`}>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
       </div>
     );
   }
@@ -31,8 +36,13 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className={`min-h-screen flex items-center justify-center p-4 ${dark ? 'bg-gray-900' : 'bg-gray-100'}`}>
       <div className="w-full max-w-md">
+        <div className="flex justify-end mb-4">
+          <button onClick={() => { setDark(!dark); localStorage.setItem('theme', dark ? 'light' : 'dark'); }} className="text-2xl">
+            {dark ? '☀️' : '🌙'}
+          </button>
+        </div>
         <h1 className="text-3xl font-bold text-center text-blue-600 mb-8">
           Catatan Keuangan
         </h1>
