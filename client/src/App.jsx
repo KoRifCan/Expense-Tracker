@@ -21,6 +21,10 @@ export default function App() {
   const verifyRole = async (u) => {
     if (!u) return;
     const data = await getUser(u.uid);
+    if (!data) {
+      await auth.signOut();
+      return;
+    }
     setUserData(data);
   };
 
@@ -28,6 +32,10 @@ export default function App() {
     const unsub = onAuthStateChanged(auth, async (u) => {
       if (u) {
         const data = await getUser(u.uid);
+        if (!data) {
+          await auth.signOut();
+          return;
+        }
         setUserData(data);
       } else {
         setUserData(null);
