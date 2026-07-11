@@ -6,6 +6,7 @@ import TransactionForm from './TransactionForm';
 import TransactionList from './TransactionList';
 import ExpenseChart from './ExpenseChart';
 import ExportButton from './ExportButton';
+import ThemeToggle from './ThemeToggle';
 import Toast, { useToast } from './Toast';
 
 const CATEGORIES = ['Makanan', 'Transportasi', 'Belanja', 'Hiburan', 'Tagihan', 'Kesehatan', 'Pendidikan', 'Gaji', 'Freelance', 'Lainnya'];
@@ -112,12 +113,20 @@ export default function Dashboard({ user }) {
 
   return (
     <div className={`min-h-screen ${dark ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-      <nav className="bg-white dark:bg-gray-800 shadow-md px-4 py-3 flex justify-between items-center gap-2">
-        <h1 className="text-lg sm:text-xl font-bold text-blue-600 shrink-0">Catatan Keuangan</h1>
-        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-          <button onClick={() => setDark(!dark)} className="text-lg" title="Toggle dark mode">
-            {dark ? '☀️' : '🌙'}
-          </button>
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700" />
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
+        <nav className="relative px-4 py-3 flex justify-between items-center gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h1 className="text-lg sm:text-xl font-bold text-white shrink-0">Catatan Keuangan</h1>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <ThemeToggle dark={dark} onToggle={() => setDark(!dark)} />
           {editingName ? (
             <form onSubmit={(e) => { e.preventDefault(); handleSaveName(); }} className="flex gap-1">
               <input
@@ -133,30 +142,33 @@ export default function Dashboard({ user }) {
           ) : (
             <button
               onClick={() => setEditingName(true)}
-              className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 truncate max-w-[120px] sm:max-w-none hover:underline"
+              className="text-xs sm:text-sm text-white/80 hover:text-white truncate max-w-[120px] sm:max-w-none"
             >
               {user.displayName || user.email}
             </button>
           )}
-          <button onClick={() => signOut(auth)} className="text-xs sm:text-sm text-red-500 hover:underline shrink-0">
+          <button onClick={() => signOut(auth)} className="text-xs sm:text-sm bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg shrink-0 transition">
             Keluar
           </button>
         </div>
-      </nav>
+        </nav>
+      </div>
 
       <div className="max-w-4xl mx-auto p-3 sm:p-4">
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
-          <select value={filter.month} onChange={(e) => setFilter({ ...filter, month: e.target.value })} className="p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600">
-            {months.map((m) => (<option key={m.value} value={m.value}>{m.label}</option>))}
-          </select>
-          <select value={filter.year} onChange={(e) => setFilter({ ...filter, year: e.target.value })} className="p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600">
-            {[2024, 2025, 2026, 2027].map((y) => (<option key={y} value={y}>{y}</option>))}
-          </select>
-          <select value={catFilter} onChange={(e) => setCatFilter(e.target.value)} className="p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600">
-            <option value="">Semua Kategori</option>
-            {CATEGORIES.map((c) => (<option key={c} value={c}>{c}</option>))}
-          </select>
-          <ExportButton transactions={filtered} />
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-xl shadow-sm border border-gray-50 dark:border-gray-700 flex flex-wrap items-center gap-2">
+            <select value={filter.month} onChange={(e) => setFilter({ ...filter, month: e.target.value })} className="p-2 border-0 rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-400">
+              {months.map((m) => (<option key={m.value} value={m.value}>{m.label}</option>))}
+            </select>
+            <select value={filter.year} onChange={(e) => setFilter({ ...filter, year: e.target.value })} className="p-2 border-0 rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-400">
+              {[2024, 2025, 2026, 2027].map((y) => (<option key={y} value={y}>{y}</option>))}
+            </select>
+            <select value={catFilter} onChange={(e) => setCatFilter(e.target.value)} className="p-2 border-0 rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-400">
+              <option value="">Semua Kategori</option>
+              {CATEGORIES.map((c) => (<option key={c} value={c}>{c}</option>))}
+            </select>
+            <ExportButton transactions={filtered} />
+          </div>
         </div>
 
         {loading ? (
@@ -174,19 +186,46 @@ export default function Dashboard({ user }) {
           <>
             {summary && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md text-center">
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Pemasukan</p>
-                  <p className="text-base sm:text-xl font-bold text-green-600">{formatMoney(summary.totalIncome)}</p>
+                <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-md border border-gray-50 dark:border-gray-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Pemasukan</p>
+                      <p className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400">{formatMoney(summary.totalIncome)}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md text-center">
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Pengeluaran</p>
-                  <p className="text-base sm:text-xl font-bold text-red-600">{formatMoney(summary.totalExpense)}</p>
+                <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-md border border-gray-50 dark:border-gray-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Pengeluaran</p>
+                      <p className="text-lg sm:text-xl font-bold text-red-600 dark:text-red-400">{formatMoney(summary.totalExpense)}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md text-center">
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Saldo</p>
-                  <p className={`text-base sm:text-xl font-bold ${summary.balance >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                    {formatMoney(summary.balance)}
-                  </p>
+                <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-md border border-gray-50 dark:border-gray-700">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${summary.balance >= 0 ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+                      <svg className={`w-5 h-5 ${summary.balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Saldo</p>
+                      <p className={`text-lg sm:text-xl font-bold ${summary.balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {formatMoney(summary.balance)}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -219,8 +258,11 @@ export default function Dashboard({ user }) {
 
             <button
               onClick={() => setShowForm(!showForm)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mb-4 w-full sm:w-auto"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-2.5 rounded-xl hover:from-blue-600 hover:to-blue-700 mb-4 w-full sm:w-auto font-medium transition shadow-sm flex items-center justify-center gap-2"
             >
+              <svg className={`w-5 h-5 transition-transform ${showForm ? 'rotate-45' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
               {showForm ? 'Tutup Form' : 'Tambah Transaksi'}
             </button>
 

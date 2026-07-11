@@ -78,7 +78,7 @@ export default function Login({ onSwitch }) {
 
   if (pendingCred) {
     return (
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm p-8 rounded-2xl shadow-xl">
         <h2 className="text-xl font-semibold mb-4 dark:text-white">Hubungkan Akun</h2>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           Email <strong>{pendingEmail}</strong> sudah terdaftar dengan password.
@@ -95,13 +95,13 @@ export default function Login({ onSwitch }) {
             required
           />
           <button type="submit" disabled={loading}
-            className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 mb-2"
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-xl hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 font-medium transition mb-2"
           >
             {loading ? 'Memproses...' : 'Hubungkan'}
           </button>
           <button type="button"
             onClick={() => { setPendingCred(null); setPendingEmail(''); setPassword(''); }}
-            className="w-full text-sm text-gray-500 hover:underline"
+            className="w-full text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
           >
             Batal
           </button>
@@ -112,33 +112,45 @@ export default function Login({ onSwitch }) {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleEmailLogin} className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
+      <form onSubmit={handleEmailLogin} className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm p-8 rounded-2xl shadow-xl">
         <h2 className="text-2xl font-semibold mb-6 text-center dark:text-white">Masuk</h2>
         {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-3 border rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white dark:border-gray-600"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div className="space-y-4 mb-6">
+          <div className="relative">
+            <svg className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full pl-10 p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white transition"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="relative">
+            <svg className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <input
+              type="password"
+              placeholder="Password"
+              className="w-full pl-10 p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white transition"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+        </div>
         <button type="submit" disabled={loading}
-          className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-xl hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 font-medium transition"
         >
           {loading ? 'Memproses...' : 'Masuk'}
         </button>
-        <p className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-center mt-5 text-sm text-gray-500 dark:text-gray-400">
           Belum punya akun?{' '}
-          <button type="button" onClick={onSwitch} className="text-blue-600 hover:underline">
+          <button type="button" onClick={onSwitch} className="text-blue-600 hover:text-blue-700 font-medium transition">
             Daftar
           </button>
         </p>
@@ -155,7 +167,7 @@ export default function Login({ onSwitch }) {
 
       <button
         onClick={handleGoogleLogin}
-        className="w-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 p-3 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2"
+        className="w-full bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm text-gray-700 dark:text-gray-200 p-3 rounded-2xl border border-gray-200 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-800 transition flex items-center justify-center gap-3 shadow-sm"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -163,7 +175,7 @@ export default function Login({ onSwitch }) {
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
         </svg>
-        Login dengan Google
+        <span className="font-medium">Login dengan Google</span>
       </button>
     </div>
   );
