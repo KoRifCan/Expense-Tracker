@@ -1,32 +1,28 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const THEME_KEY = 'theme';
-const THEME_EVENT = 'themechange';
 
-function getInitial() {
-  return localStorage.getItem(THEME_KEY) === 'dark';
+function apply(val) {
+  if (val) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
 }
 
 export default function useTheme() {
-  const [dark, setDarkState] = useState(getInitial);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark);
-  }, []);
-
-  useEffect(() => {
-    const handler = () => setDarkState(getInitial());
-    window.addEventListener(THEME_EVENT, handler);
-    return () => window.removeEventListener(THEME_EVENT, handler);
-  }, []);
+  const [dark, setDarkState] = useState(() => {
+    const saved = localStorage.getItem(THEME_KEY) === 'dark';
+    apply(saved);
+    return saved;
+  });
 
   const setDark = useCallback((next) => {
-    const val = typeof next === 'function' ? next(getInitial()) : next;
+    const val = typeof next === 'function' ? next(dark) : next;
     localStorage.setItem(THEME_KEY, val ? 'dark' : 'light');
-    document.documentElement.classList.toggle('dark', val);
+    apply(val);
     setDarkState(val);
-    window.dispatchEvent(new Event(THEME_EVENT));
-  }, []);
+  }, [dark]);
 
   return [dark, setDark];
 }
