@@ -157,12 +157,14 @@ export default function Login({ onSwitch }) {
         </p>
       </form>
 
-      <div className="relative">
+      <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+          <div className="w-full border-t border-gray-200 dark:border-gray-600" />
         </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="bg-gray-100 dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">atau</span>
+        <div className="relative flex justify-center">
+          <span className="bg-white dark:bg-gray-800 px-4 py-1 rounded-full text-xs font-medium text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-600 shadow-sm">
+            atau
+          </span>
         </div>
       </div>
 
