@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { transactions } from '../api';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase/config';
+import * as txns from '../api/transactions';
 import TransactionForm from './TransactionForm';
 import TransactionList from './TransactionList';
 
-export default function Dashboard({ user, onLogout }) {
+export default function Dashboard({ user }) {
   const [data, setData] = useState([]);
   const [summary, setSummary] = useState(null);
   const [editing, setEditing] = useState(null);
@@ -11,31 +13,31 @@ export default function Dashboard({ user, onLogout }) {
   const [filter, setFilter] = useState({ month: String(new Date().getMonth() + 1), year: String(new Date().getFullYear()) });
 
   const loadData = async () => {
-    const [txns, summ] = await Promise.all([
-      transactions.getAll(filter),
-      transactions.getSummary(filter),
+    const [txnList, summ] = await Promise.all([
+      txns.getAll(user.uid, filter),
+      txns.getSummary(user.uid, filter),
     ]);
-    setData(txns);
+    setData(txnList);
     setSummary(summ);
   };
 
-  useEffect(() => { loadData(); }, [filter.month, filter.year]);
+  useEffect(() => { loadData(); }, [user.uid, filter.month, filter.year]);
 
   const handleCreate = async (payload) => {
-    await transactions.create(payload);
+    await txns.create(user.uid, payload);
     setShowForm(false);
     loadData();
   };
 
   const handleUpdate = async (payload) => {
-    await transactions.update(editing.id, payload);
+    await txns.update(user.uid, editing.id, payload);
     setEditing(null);
     loadData();
   };
 
   const handleDelete = async (id) => {
     if (confirm('Hapus transaksi ini?')) {
-      await transactions.delete(id);
+      await txns.del(user.uid, id);
       loadData();
     }
   };
@@ -54,8 +56,10 @@ export default function Dashboard({ user, onLogout }) {
       <nav className="bg-white shadow-md p-4 flex justify-between items-center">
         <h1 className="text-xl font-bold text-blue-600">Catatan Keuangan</h1>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">Halo, {user.name}</span>
-          <button onClick={onLogout} className="text-sm text-red-500 hover:underline">
+          <span className="text-sm text-gray-600">
+            {user.displayName || user.email}
+          </span>
+          <button onClick={() => signOut(auth)} className="text-sm text-red-500 hover:underline">
             Keluar
           </button>
         </div>

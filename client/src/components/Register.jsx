@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { auth } from '../api';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase/config';
 
-export default function Register({ onRegister, onSwitch }) {
+export default function Register({ onSwitch }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,10 +14,15 @@ export default function Register({ onRegister, onSwitch }) {
     setError('');
     setLoading(true);
     try {
-      const data = await auth.register({ name, email, password });
-      onRegister(data);
+      await createUserWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      setError(err.message);
+      if (err.code === 'auth/email-already-in-use') {
+        setError('Email sudah terdaftar');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Password minimal 6 karakter');
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }

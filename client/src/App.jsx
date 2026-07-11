@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { auth } from './api';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase/config';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
@@ -10,26 +11,12 @@ export default function App() {
   const [page, setPage] = useState('login');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      auth.me()
-        .then((u) => setUser(u))
-        .catch(() => localStorage.removeItem('token'))
-        .finally(() => setLoading(false));
-    } else {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
       setLoading(false);
-    }
+    });
+    return unsub;
   }, []);
-
-  const handleLogin = (data) => {
-    localStorage.setItem('token', data.token);
-    setUser(data.user);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-  };
 
   if (loading) {
     return (
@@ -40,7 +27,7 @@ export default function App() {
   }
 
   if (user) {
-    return <Dashboard user={user} onLogout={handleLogout} />;
+    return <Dashboard user={user} />;
   }
 
   return (
@@ -50,9 +37,9 @@ export default function App() {
           Catatan Keuangan
         </h1>
         {page === 'login' ? (
-          <Login onLogin={handleLogin} onSwitch={() => setPage('register')} />
+          <Login onSwitch={() => setPage('register')} />
         ) : (
-          <Register onRegister={handleLogin} onSwitch={() => setPage('login')} />
+          <Register onSwitch={() => setPage('login')} />
         )}
       </div>
     </div>
